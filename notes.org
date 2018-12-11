@@ -1,0 +1,48 @@
+* Selecting a sentence within a paragraph.
+
+Holy crap.
+
+There are a number of text representation of the text in a paragraph.
+
+** <p>.innerText 
+This is just the text, as it appears to the eye without
+formatting. any html tags are not included.
+
+
+"The xv6 kernel maintains many pieces of state for each
+process, which it gathers into a struct proc A process's most
+important pieces of kernel state are its page table, its kernel stack,
+and its run state. We'll use the notation p->xxx to refer to elements
+of the proc structure."
+
+
+** <p>.textContent
+this is the text as it appears in the HTML document with all white space.
+
+"
+                The xv6 kernel maintains many pieces of state for each process,
+                which it gathers into a
+                struct proc
+                A process's most important pieces of kernel state are its 
+                page table, its kernel stack, and its run state.
+                We'll use the notation p->xxx to refer to elements of the
+                    proc structure.
+                "
+
+** <p>.innerHTML
+same a <p>.textContent, but with tags included and escaped tokens.
+
+tmp.innerHTML
+"
+                The xv6 kernel maintains many pieces of state for each process,
+                which it gathers into a
+                <a href="javascript:gotoLine(2337);">struct proc</a>
+                A process's most important pieces of kernel state are its 
+                page table, its kernel stack, and its run state.
+                We'll use the notation <code>p-&gt;xxx</code> to refer to elements of the
+                    <code>proc</code> structure.
+                "
+
+ 
+
+* So What's the problem?

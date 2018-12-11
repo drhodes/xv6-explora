@@ -1,0 +1,155 @@
+
+
+
+
+
+
+
+
+class Paragraph {
+    constructor(el) {
+        this.el = el;
+        this.sentenceRanges = [];
+        this.buildRanges();
+        // sentence range. { start:0, end:0, txt:"text" }        
+        this.synth = window.speechSynthesis;
+    }
+
+    buildRanges() {
+        let txt = this.el.textContent;
+        let elText = this.el.childNodes[0];
+        var curRange = document.createRange();
+        curRange.setStart(elText, 0);
+        
+        for (var i = 0; i < txt.length; i++) {
+            if (txt[i] == '.') {
+                // end of sentence.
+                curRange.setEnd(elText, i);
+                this.sentenceRanges.push(curRange);                
+                // start of next sentence.
+                curRange = document.createRange();
+                curRange.setStart(elText, i+1);
+            } else {
+                // in sentence. do nothing.                
+            }
+        }
+        this.sentenceRanges.push(curRange);
+    }
+
+    selectAndSpeak(n) {
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        
+        let range = this.sentenceRanges[n];
+        selection.addRange(range);
+
+        let txt = this.el.textContent.slice(range.startOffset, range.endOffset);
+        
+        var utterThis = new SpeechSynthesisUtterance(txt);
+        utterThis.voice = this.synth.getVoices()[2];
+        utterThis.pitch = 1;
+        utterThis.rate = 2;
+        this.synth.speak(utterThis);
+    }
+
+    
+    
+    curSentence() {
+    }
+}
+
+
+
+
+
+
+
+
+class ParagraphSelector {
+    constructor() {
+        this.paragraphs = $("p");
+        this.currentP = 0;
+        this.highlightCur(true);
+        this.synth = window.speechSynthesis;
+    }
+
+    labelParagraphs() {
+        this.paragraphs.foreach(p => {
+        });
+    }
+
+    curP() {
+        return this.paragraphs[this.currentP];
+    }
+
+    prevP() {
+        return this.paragraphs[this.currentP > 0 ? this.currentP - 1 : this.currentP];
+    }
+
+    
+    highlightCur(bool) {
+        if (bool) {
+            this.curP().style.background = "#EEEEFF";
+        } else {
+            this.curP().style.background = "#FFFFFF";
+        }
+    }
+
+    scrollTo() {
+        $('html, body').animate({
+            scrollTop: this.curP().offsetTop - 200
+        }, 0);        
+    }
+    
+    selectNext() {
+        this.highlightCur(false);
+        this.currentP += 1;
+        if (this.currentP >= this.paragraphs.length) {
+            this.currentP = this.paragraphs.length - 1;
+        }
+        this.highlightCur(true);
+        this.scrollTo();
+    }
+
+    
+    selectPrev() {
+        this.highlightCur(false);
+        this.currentP -= 1;
+        if (this.currentP < 0) {
+            this.currentP = 0;
+        }
+        this.highlightCur(true);
+        this.scrollTo();
+    }
+
+
+    toSpeech() {
+        // select the current paragraphs text
+        //
+        var utterThis = new SpeechSynthesisUtterance(this.curP().textContent);
+        utterThis.voice = this.synth.getVoices()[2];
+        utterThis.pitch = 1;
+        utterThis.rate = 1;
+        this.synth.speak(utterThis);
+        console.log("tospeech");
+    }
+    
+}
+
+
+{
+    var __paragraphSelector = new ParagraphSelector();
+    $(document).keydown(function(event){
+        if (event.keyCode == 74) {
+            __paragraphSelector.selectNext();
+        }
+        if (event.keyCode == 75) {
+            __paragraphSelector.selectPrev();
+        }
+        if (event.keyCode == 83) {            
+            __paragraphSelector.toSpeech();
+        }
+        //alert(event.keyCode);
+
+    });
+}
