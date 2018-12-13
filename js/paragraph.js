@@ -1,5 +1,6 @@
 class Sentence {
-    
+    constructor(el, txt) {
+    }
 }
 
 
