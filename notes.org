@@ -15,7 +15,6 @@ important pieces of kernel state are its page table, its kernel stack,
 and its run state. We'll use the notation p->xxx to refer to elements
 of the proc structure."
 
-
 ** <p>.textContent
 this is the text as it appears in the HTML document with all white space.
 
