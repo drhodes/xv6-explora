@@ -1,20 +1,34 @@
 class NodeWrapper {
     constructor(node, pos) {
         this.node = node;
+        this.extractTextNode(node);
+        
         this.pos = pos;
         this.span = [pos, pos + node.textContent.length];
+        console.log(this.span);
     }
 
-    // add a predicate to know if a paragraph-relative-pos is
-    // in this node.
-    containsPos = function(p) {
-        return p >= this.span[0] && p < this.span[1];
-    };
-
-    highlightToEndFrom = function(p) {
-        if (node.containsSpan(p)) {
-            
+    extractTextNode(node) {
+        console.log(node);
+        if (node.nodeName == "#text") {
+            this.node = node;
+            return;
+        } else {
+            node.childNodes.forEach(n => {
+                this.extractTextNode(n);
+            });
         }
+    }
+    
+    // add a predicate to know if a paragraph-relative-pos is in this
+    // node.
+    containsPos(pos) {
+        return pos >= this.span[0] && pos < this.span[1];
+    }
+
+    // given a paragraph relative offset, what is the offset in this node?
+    getOffset(pos) {
+        return pos - this.span[0];
     }
 }
 
@@ -28,165 +42,52 @@ class Sentence {
         this.wrappedNodes = [];
         this.txt = txt;
         
-        this.tagNodeSpans();
+        this.setupNodeSpans();
         this.ranges = [];
-        //this.setupHighlightRanges();
     }
     
-    tagNodeSpans() {
+    setupNodeSpans() {
         var pos = 0;
-        this.el.childNodes.forEach(node => {
-            this.wrappedNodes.push(new NodeWrapper(node, pos));
+        this.el.childNodes.forEach(node => {            
+            let wnode = new NodeWrapper(node, pos);
+            this.wrappedNodes.push(wnode);
             pos += node.textContent.length;
         });
-        
-        
     }
     
-    setupHighlightRanges() {
+    highlight() {
         // get this!  <p>.childNodes can have more than one DOM
         // element.  There might be [text, a, text] each of which
         // contributes to the rendered text in a paragraph seen by the
         // user. 
-
-        // consider some text found in a rendered <p>
+        let wrappedNode0 = this.nodeContainingPos(this.span[0]);
+        let offset0 = wrappedNode0.getOffset(this.span[0]);
         
-        // A fox jumped over the lazy brown dog.
-
-        // but the word "fox" might be an HTML link, so this sentence
-        // doesn't occupy one childNode of <p>, it would be part of
-        // three! more insideously, the sentence will occupy only
-        // portions of each node.
-
-        // so the job is to find which portions of the rendered text
-        // are in which portions of the childNodes of <p>
-
-        // <1          ><2><3                                                >
-        // |bla bla.  A fox jumped over the lazy brown dog.  The dog bla bla
-        //            A 
-        //              fox
-        //                  jumped over the lazy brown dog.
-
-        // luckily, childNodes have the 'textContent' field.
-        // from span1, only the text "A " is used.
-        // from span2, only the text "fox" is used.
-        // from span3, only the text " jumped over the lazy brown dog" is used.
-
-        // there are three different ranges here that need to be
-        // considered. Each of those ranges is contained within a span
-        // the covers each <p>.childNode
-
-        // so the easy way to do this.
-        // assign a span to each childNode within the <p>
+        let wrappedNode1 = this.nodeContainingPos(this.span[1] - 1);
+        let offset1 = wrappedNode1.getOffset(this.span[1]);
         
-        // CASES
-        // 1) this.txt spans one childNode.       
-        // 2) this.txt spans two childNodes.
-        // 3) this.txt spans three or more childNodes.
-
-        let idxM = this.childIdxContainingPos(this.span[0]);
-        let idxN = this.childIdxContainingPos(this.span[1]);
-                                             
-        // if N = M then case 1.
-        if (idxN == idxM) {
-            this.highlightCase1(idxM, idxN);
-            return;
-        }
-        // if N == M + 1 then case 2.
-        if (idxN == idxM + 1) {
-            this.highlightCase2(idxM, idxN);
-            return;
-        }
-        // if N > M + 1 then case 3.
-        if (idxN > idxM + 1) {
-            this.highlightCase3(idxM, idxN);
-            return;
-        }
+        let range = document.createRange();
+        let selection = window.getSelection();
+        
+        selection.removeAllRanges();
+        range.setStart(wrappedNode0.node, offset0);
+        range.setEnd(wrappedNode1.node, offset1);
+        selection.addRange(range);        
     }
     
-    highlightCase1(idxM, idxN) {
-        this.ranges.push(document.createRange());
-        let elText = this.el.childNodes[0];
-        this.ranges[0].setStart(elText, this.span[0]);
-        this.ranges[0].setEnd(elText, this.span[1]);
-    }
-
-    highlightCase2(idxM, idxN) {
-        throw Error("CASE 2 unimplemented");
-        // we'll need two ranges.
-        // this.ranges.push(document.createRange());
-        // this.ranges.push(document.createRange());
-
-        // // where does this.txt start in idxM ?
-        // let startInM = this.span[0] - this.getStartPosOfChild(idxM);
-        // let nodeM = this.el.childNodes[idxM];
-        // this.ranges[0].setStart(
-        
-        // // where does this.txt stop in idxN ?
-        // let startInN = this.span[1] - this.getStartPosOfChild(idxN);
-        
-    }
-
-    highlightCase3(idxM, idxN) {
-        // find the index of the left childNode, the one that contains this.span[0];
-        let nodeIdxL = this.childIdxContainingPos(this.span[0]);
-        
-        // find the index of the right childNode, the one that contains this.span[1];
-        let nodeIdxR = this.childIdxContainingPos(this.span[1]);
-
-        let r = document.createRange();
-        let leftSpan = this.absSpanOfNode(nodeIdxL);
-        let node = this.el.childNodes[idxM];        
-        r.setStart(node, this.span[0] - leftSpan[0]);
-        r.setEnd(node, node.textContent.length);
-        this.ranges.push(r);
-    }
-
-    absSpanOfNode(idx) {
-        var from = 0;
-        for (var i=0; i < this.el.childNodes.length; i++) {
-            var to = from + this.el.childNodes[i].textContent.length;
-            if (i == idx) return [from, to];
-            from = to;
+    nodeContainingPos(pos) {
+        let matches = this.wrappedNodes.filter(node => node.containsPos(pos));
+        switch(matches.length) {
+        case 0: throw Error("no matching nodes found with position: " + pos);
+        case 1: return matches[0];
+        default: throw Error("more than one matching node found?? with pos: " + pos);
         }
-        console.log(this.el);
-        throw Error("Could not find position: " + p + " in <p>" + this.txt);
-    }
-    
-    getStartPosOfNode(idx) {
-        var curP = 0;
-        for (var i=0; i < this.el.childNodes[i].length; i++) {
-            if (i == idx) return curP;
-            curP += this.el.childNodes[i].length;
-        }
-        console.log(this.el);
-        throw Error("Could not find position: " + idx + " in <p>" + this.txt);
-    }
-
-    getEndPosOfNode(idx) {
-        this.getStartPosOfNode(idx) + this.el.childNodes[idx].textContent.length;
-    }
-
-    
-    childIdxContainingPos(p) {
-        var from = 0;
-        for (var i=0; i < this.el.childNodes.length; i++) {
-            var to = from + this.el.childNodes[i].textContent.length;
-            console.log([from, to]);
-            // CAUTION the follow (<=) comparison is sketchy.
-            if (p >= from && p <= to) return i;
-            from = to;
-        }
-        console.log(this.el);
-        throw Error("Could not find position: " + p + " in <p>" + this.txt);
     }
     
     selectAndSpeak(speed) {
         let synth = window.speechSynthesis;
         synth.cancel();
-        var selection = window.getSelection();
-        selection.removeAllRanges();
-        this.ranges.forEach(r => selection.addRange(r));
+        this.highlight();
         
         var utterThis = new SpeechSynthesisUtterance(this.txt);
         utterThis.voice = synth.getVoices()[2];
@@ -239,20 +140,20 @@ class Paragraph {
     
     repeat() {
         this.synth.cancel();
-        this.selectAndSpeak();
+        this.sentences[this.curSentence].selectAndSpeak(this.speed);
     }
     
     prevSentence() {
         if (this.atTop()) return;
-        this.curRange -= 1;        
-        this.selectAndSpeak(this.curRange);
-        this.scrollTo();
+        console.log(this.sentences[this.curSentence]);
+        this.sentences[this.curSentence].selectAndSpeak(this.speed);
+        this.curSentence -= 1;
     }
     
     scrollTo() {
         $('html, body').animate({
-            scrollTop: this.el.offsetTop - 200
-        }, 0);        
+            scrollTop: this.el.offsetTop - 300
+        }, 50);        
     }
     
     highlight(bool) {
@@ -261,6 +162,7 @@ class Paragraph {
         } else {
             this.el.style.background = "#FFFFFF";
         }
+        this.scrollTo();
     }
     
     updateSpeed(speed) { this.speed = speed; }
@@ -273,6 +175,7 @@ class ParagraphSelector {
         this.pidx = 0;
         this.curParagraph = new Paragraph(this.pels[0], this.speed);
         this.synth = window.speechSynthesis;
+        this.lastMotion = undefined; // 
         // setup click events.
         this.pels.click(e => this.selectClick(e.target));
     }
@@ -315,16 +218,22 @@ class ParagraphSelector {
             this.curParagraph.highlight(false);
             this.pidx -= 1;
             this.curParagraph = new Paragraph(this.curPel(), this.speed);
-            this.curParagraph.gotoBottom();
+            this.curParagraph.gotoBottom();            
+        } else {
+            // step through the current paragraph sentence by sentence.
+            this.curParagraph.prevSentence();
         }
-        // step through the current paragraph sentence by sentence.
-        this.curParagraph.prevSentence();
     }
 
     decreaseSpeed() {
         if (this.speed > 1) this.speed -= .2;
         this.curParagraph.updateSpeed(this.speed);
         this.curParagraph.repeat();
+    }
+
+    stop() {
+        let synth = window.speechSynthesis;
+        synth.cancel();
     }
 
     increaseSpeed() {
@@ -345,16 +254,37 @@ class ParagraphSelector {
         if (event.keyCode == 75) {
             __paragraphSelector.selectPrev();
         }
-        if (event.keyCode == 83) {            
-            __paragraphSelector.toSpeech();
-        }
         if (event.keyCode == 187) {            
             __paragraphSelector.increaseSpeed();
         }
         if (event.keyCode == 189) {            
             __paragraphSelector.decreaseSpeed();
         }
+        if (event.keyCode == 83) {            
+            __paragraphSelector.stop();
+        }
         
         // alert(event.keyCode);
     });
+}
+
+var dbg = undefined;
+
+function foo() {
+    let temp = $("p")[9];
+    console.log(temp);
+    let node0 = temp.childNodes[0];
+    let node1 = temp.childNodes[1].childNodes[0];
+    console.log(["node1 text: ", node1.textContent]);
+    // console.log(node0);
+    console.log(node1);
+    dbg = temp.childNodes[1];
+    let range0 = document.createRange();
+    let selection = window.getSelection();
+    
+    selection.removeAllRanges();
+    
+    range0.setStart(node0, 0);
+    range0.setEnd(node1, node1.textContent.length);
+    selection.addRange(range0);
 }
