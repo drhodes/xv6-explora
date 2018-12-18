@@ -182,7 +182,7 @@ class Paragraph {
     
     highlight(bool) {
         if (bool) {
-            this.el.style.background = "#EEEEFF";
+            this.el.style.background = "#F5F5F5";
         } else {
             this.el.style.background = "#FFFFFF";
         }
