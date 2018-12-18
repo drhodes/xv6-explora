@@ -7,13 +7,13 @@ env = Environment(
 
 lineTable = {
     "fork": 2580,
-    
+    "forkret": 2853,
 }
 
 
 def goto_line(ident):
     #{{"fork" | goto_line}}
-    temp = '<a href="javascript:gotoLine(%d);">%s</a>'
+    temp = '<code><a href="javascript:gotoLine(%d);">%s</a></code>'
     return temp % (lineTable[ident], ident)
 
 
