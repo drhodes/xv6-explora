@@ -24,15 +24,18 @@
   </p>
 
   <p>
-    This chapter provides an overview of how operating systems are organized to achieve
-    these 3 requirements.  It turns out there are many ways to do so, but this text
-    focuses on mainstream designs centered around a <i>monolithic kernel</i>, which is used by many Unix operating systems.
-    This chapter introduces xv6's design by tracing the creation of the first process when xv6 starts
-    running.  In doing so, the text provides a glimpse of the implementation of all
-    major abstractions that xv6 provides, how they interact, and how the three
-    requirements of multiplexing, isolation, and interaction are met.  Most of xv6
-    avoids special-casing the first process, and instead reuses <code>that</code> xv6 must
-    provide for standard operation.  Subsequent chapters will explore each
+    This chapter provides an overview of how operating systems are
+    organized to achieve these 3 requirements.  It turns out there are
+    many ways to do so, but this text focuses on mainstream designs
+    centered around a <i>monolithic kernel</i>, which is used by many
+    Unix operating systems.  This chapter introduces xv6's design by
+    tracing the creation of the first process when xv6 starts running.
+    In doing so, the text provides a glimpse of the implementation of
+    all major abstractions that xv6 provides, how they interact, and
+    how the three requirements of multiplexing, isolation, and
+    interaction are met.  Most of xv6 avoids special-casing the first
+    process, and instead reuses <code>that</code> xv6 must provide for
+    standard operation.  Subsequent chapters will explore each
     abstraction in more detail.
   </p>
   
