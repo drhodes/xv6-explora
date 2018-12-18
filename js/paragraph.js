@@ -102,11 +102,12 @@ class Paragraph {
     constructor(el, speed) {
         this.speed = speed;
         this.el = el;
-        this.sentences = [];
-        this.curSentence = 0;        
-        this.buildSentences();
         this.synth = window.speechSynthesis;
-        
+        //
+        this.sentences = [];
+        this.curSentenceIdx = 0;
+        this.buildSentences();
+        this.sentences[0].highlight();
         // do
         this.highlight(true);
         this.scrollTo();
@@ -125,30 +126,53 @@ class Paragraph {
         });
     }
 
-    atTop() { return this.curSentence == 0; }
-    atBottom() { return this.curSentence >= this.sentences.length; }
-    gotoBottom() { this.curSentence = this.sentences.length - 1; }
-    
-    nextSentence() {
-        if (this.atBottom()) return;
-
-        console.log(this.sentences[this.curSentence]);
-        this.sentences[this.curSentence].selectAndSpeak(this.speed);
-        this.curSentence += 1;
-        this.scrollTo();
+    atTop() {
+        return this.curSentenceIdx <= 0;
     }
     
-    repeat() {
-        this.synth.cancel();
-        this.sentences[this.curSentence].selectAndSpeak(this.speed);
+    atBottom() {
+        return this.curSentenceIdx >= this.sentences.length - 1;
+    }
+    
+    toBottom() {
+        this.curSentence().highlight(false);
+        this.curSentenceIdx = this.sentences.length - 1;
+        this.curSentence().highlight(true);
+    }
+
+    curSentence() {
+        return this.sentences[this.curSentenceIdx];
     }
     
     prevSentence() {
-        if (this.atTop()) return;
-        console.log(this.sentences[this.curSentence]);
-        this.sentences[this.curSentence].selectAndSpeak(this.speed);
-        this.curSentence -= 1;
+        if (!this.atTop()) {
+            this.curSentenceIdx -= 1;
+            this.curSentence().highlight(true);
+        } else {
+            throw Error("trying to increment this.curSentenceIdx out of range");
+        }
     }
+    
+    nextSentence() {
+        if (this.curSentenceIdx < this.sentences.length - 1) {
+            this.curSentenceIdx += 1;
+            this.curSentence().highlight(true);
+        } else {
+            throw Error("trying to increment this.curSentenceIdx out of range");
+        }
+    }
+
+    
+    repeat() {
+        this.synth.cancel();
+        this.sentences[this.curSentenceIdx].selectAndSpeak(this.speed);
+    }
+
+    speak() {
+        this.synth.cancel();
+        this.sentences[this.curSentenceIdx].selectAndSpeak(this.speed);
+    }
+
     
     scrollTo() {
         $('html, body').animate({
@@ -180,14 +204,21 @@ class ParagraphSelector {
         this.pels.click(e => this.selectClick(e.target));
     }
     
-    curPel() { return this.pels[this.pidx]; }
+    curPel() {
+        return this.pels[this.pidx];
+    }
     
     prevP() {
         return this.pels[this.pidx > 0 ? this.pidx - 1 : this.pidx];
     }
     
-    atTop() { return this.pidx == 0; }
-    atBottom() { return this.pidx >= this.pels.length - 1; }
+    firstParagraph() {
+        return this.pidx == 0;
+    }
+    
+    lastParagraph() {
+        return this.pidx >= this.pels.length - 1;
+    }
 
     selectClick(pel) {
         // need to find pidx of thie pel.
@@ -199,30 +230,43 @@ class ParagraphSelector {
         console.log(this.pidx);
         this.curParagraph.highlight(false);
         this.curParagraph = new Paragraph(pel, this.speed);
-
     }
     
-    selectNext() {
-        if (this.curParagraph.atBottom()) {
-            // at the bottom of the current paragraph, onto the next!
-            this.curParagraph.highlight(false);
+    selectNextSentence() {
+        if (this.curParagraph.atBottom() && !this.lastParagraph()) { 
+            // if the current sentence is at the bottom of the paragraph
+            // then move to the next paragraph,
             this.pidx += 1;
-            this.curParagraph = new Paragraph(this.curPel(), this.speed);
-        } 
-        // step through the current paragraph sentence by sentence.
-        this.curParagraph.nextSentence();
+            this.curParagraph.highlight(false);
+            this.curParagraph = new Paragraph(this.pels[this.pidx], this.speed);
+        } else if (!this.curParagraph.atBottom()) {
+            this.curParagraph.nextSentence();
+        } else if (this.curParagraph.atBottom() && this.lastParagraph()) {
+            console.log("End of chapter");
+        } else {
+            console.log("unhandled case in select next sentence");
+        }
+        this.curParagraph.speak();
+        
     }
     
-    selectPrev() {
-        if (this.curParagraph.atTop()) {
+    selectPrevSentence() {
+        if (this.curParagraph.atTop() && !this.firstParagraph()) { 
+            // if the current sentence is at the top of the paragraph
+            // then move to the prev paragraph,
             this.curParagraph.highlight(false);
             this.pidx -= 1;
-            this.curParagraph = new Paragraph(this.curPel(), this.speed);
-            this.curParagraph.gotoBottom();            
-        } else {
-            // step through the current paragraph sentence by sentence.
+            this.curParagraph = new Paragraph(this.pels[this.pidx], this.speed);
+            this.curParagraph.toBottom();
+        } else if (!this.curParagraph.atTop()) {
             this.curParagraph.prevSentence();
+        } else if (this.curParagraph.atTop() && this.firstParagraph()) {
+            console.log("At the beginning");
+        } else {
+            console.log("unhandled case in select prev sentence");
         }
+        this.curParagraph.speak();
+        
     }
 
     decreaseSpeed() {
@@ -249,10 +293,10 @@ class ParagraphSelector {
     var __paragraphSelector = new ParagraphSelector();
     $(document).keydown(function(event){
         if (event.keyCode == 74) {
-            __paragraphSelector.selectNext();
+            __paragraphSelector.selectNextSentence();
         }
         if (event.keyCode == 75) {
-            __paragraphSelector.selectPrev();
+            __paragraphSelector.selectPrevSentence();
         }
         if (event.keyCode == 187) {            
             __paragraphSelector.increaseSpeed();
