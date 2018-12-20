@@ -110,11 +110,12 @@ class Paragraph {
         this.sentences[0].highlight();
         // do
         this.highlight(true);
-        this.scrollTo();
+        // this.scrollTo();
     }
 
     buildSentences() {
         const sep = ". ";
+        // var txt = this.el.textContent.replace("\n", "\n");
         var parts = this.el.textContent.split(sep);
         var pos = 0;
         
@@ -220,6 +221,10 @@ class ParagraphSelector {
         return this.pidx >= this.pels.length - 1;
     }
 
+    speakCurrentSentence() {
+        this.curParagraph.speak();
+    }
+    
     selectClick(pel) {
         // need to find pidx of thie pel.
         for (var i=0; i<this.pels.length; i++) {
@@ -239,6 +244,8 @@ class ParagraphSelector {
             this.pidx += 1;
             this.curParagraph.highlight(false);
             this.curParagraph = new Paragraph(this.pels[this.pidx], this.speed);
+            this.curParagraph.scrollTo();
+
         } else if (!this.curParagraph.atBottom()) {
             this.curParagraph.nextSentence();
         } else if (this.curParagraph.atBottom() && this.lastParagraph()) {
@@ -258,6 +265,8 @@ class ParagraphSelector {
             this.pidx -= 1;
             this.curParagraph = new Paragraph(this.pels[this.pidx], this.speed);
             this.curParagraph.toBottom();
+            this.curParagraph.scrollTo();
+           
         } else if (!this.curParagraph.atTop()) {
             this.curParagraph.prevSentence();
         } else if (this.curParagraph.atTop() && this.firstParagraph()) {
@@ -265,6 +274,7 @@ class ParagraphSelector {
         } else {
             console.log("unhandled case in select prev sentence");
         }
+        this.curParagraph.scrollTo();
         this.curParagraph.speak();
         
     }
@@ -304,11 +314,15 @@ class ParagraphSelector {
         if (event.keyCode == 189) {            
             __paragraphSelector.decreaseSpeed();
         }
-        if (event.keyCode == 83) {            
+        if (event.keyCode == 27) {            
             __paragraphSelector.stop();
         }
+        if (event.keyCode == 83) {            
+            __paragraphSelector.speakCurrentSentence();
+        }
+
         
-        // alert(event.keyCode);
+        //alert(event.keyCode);
     });
 }
 
