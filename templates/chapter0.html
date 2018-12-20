@@ -1,6 +1,6 @@
 <div> <!-- chapter 0 -->
   <h1><a name="chapter0">CHAPTER 0</a></h1>
-  <h3>Operating System Interfaces </h3>
+  {{ "Operating System Interfaces" | chapter }}
   <p>
     The job of an operating system is to share a computer among multiple programs
     and to provide a more useful set of services than the hardware alone supports. The
@@ -28,9 +28,8 @@
     to a lesser extent, Microsoft Windows—have Unix-like interfaces. Understanding xv6
     is a good start toward understanding any of these systems and many others. </p>
   
-  <img src="figs/fig0-1-dar.jpg" alt="figure 1" class="img-thumbnail">
 
-  <center> figure 0-1 </center>
+  {{ "figure 0-1" | figure("0-1-dar") }}
   <br>
   
   <p>
@@ -81,7 +80,7 @@
     simple implementation of the essence of the Unix Bourne
     shell. Its implementation can be found at line <a href="javascript:gotoLine(8550)">8550</a>.</p>
 
-  <h3>Processes and memory</h3>
+  {{ "Processes and memory" | section }}
   
   <p> An xv6 process consists of user-space memory
     (instructions, data, and stack) and per-process state
@@ -92,30 +91,31 @@
     it next runs the process. The kernel associates a process
     identifier, or pid, with each process.</p>
   
-  <p>A process may create a new process using the <a href="javascript:gotoLine(2580);">fork</a> system
+  <p>A process may create a new process using the {{ "fork" | goto_line }}  system
     call. Fork creates a new process, called the child process,
     with exactly the same memory contents as the calling
     process, called the parent process. Fork returns in both the
     parent and the child.  In the parent, fork returns the
     child’s pid; in the child, it returns zero. For example,
     consider the following program fragment: </p>
-    <code><pre>
-        
-int pid = fork();
-                    
-if(pid > 0){
-    printf("parent: child=%d\n", pid);
-    pid = wait();
-    printf("child %d is done\n", pid);
-} else if(pid == 0){
-    printf("child: exiting\n");
-    exit();
-} else {
-    printf("fork error\n");
-}
+  
+  {{
+  '''        
+  int pid = fork();
+  
+  if(pid > 0){
+  printf("parent: child=%d\\n", pid);
+  pid = wait();
+  printf("child %d is done\\n", pid);
+  } else if(pid == 0){
+  printf("child: exiting\\n");
+  exit();
+  } else {
+  printf("fork error\\n");
+  }
+  '''
+  | code }}
 
-        
-  </code></pre>
   <p> The exit system call causes the calling process to stop
     executing and to release resources such as memory and open
     files. The wait system call returns the pid of an exited
@@ -184,19 +184,18 @@ if(pid > 0){
     file start executing at the entry point declared in the
     ELF header.  <a href="javascript:gotoLine(6610);">exec</a> takes two arguments: the name of the file
     containing the executable and an array of string
-    arguments. For example:<p>
-    
+    arguments. For example:
+  </p>
 
-    <code> <pre>
-char *argv[3];
-argv[0] = "echo";
-argv[1] = "hello";
-argv[2] = 0;
-exec("/bin/echo", argv);
-printf("exec error\n");
-    </pre> </code>
-    
-    
+  {{'''
+  char *argv[3];
+  argv[0] = "echo";
+  argv[1] = "hello";
+  argv[2] = 0;
+  exec("/bin/echo", argv);
+  printf("exec error\\n");
+  ''' | code }}
+  
   <p>
     This fragment replaces the calling program with an
     instance of the program /bin/echo running with the argument list echo
@@ -207,7 +206,7 @@ printf("exec error\n");
   <p>The xv6 shell uses the above calls to run programs on
     behalf of users. The main structure of the shell is simple; see main
     <a href="javascript:gotoLine(8701);">(8701)</a>. The main loop reads a line of input from the user with
-    getcmd. Then it calls <a href="javascript:gotoLine(2580);">fork</a>, which creates a copy of the shell process.
+    getcmd. Then it calls {{ "fork" | goto_line }} , which creates a copy of the shell process.
     The parent calls wait, while the child runs the command. For example,
     if the user had typed ‘‘echo hello’’ to the shell, runcmd would have
     been called with ‘‘echo hello’’ as the argument. runcmd <a href="javascript:gotoLine(8606);">(8606)</a> runs
@@ -277,29 +276,29 @@ printf("exec error\n");
     standard output. If an error occurs, it writes a message to the
     standard error.</p>
   
-  <code><pre>
-char buf[512];
-int n;
-for(;;) {
+  {{'''
+  char buf[512];
+  int n;
+  for(;;) {
   n = read(0, buf, sizeof buf);
   if(n == 0)
-    break;
+  break;
   if(n < 0) {
-    fprintf(2, "read error\n");
-    exit();
-  }
-  if(write(1, buf, n) != n){
-    fprintf(2, "write error\n");
-    exit();
-  }
-}
-         </code></pre>
-  
-  <p>The important thing to note in the code fragment is that cat doesn’t know whether it
-    is reading from a file, console, or a pipe. Similarly cat doesn’t know whether it is
-    printing to a console, a file, or whatever. The use of file descriptors and the convention
-    that file descriptor 0 is input and file descriptor 1 is output allows a simple implementation
-    of cat.</p>
+         fprintf(2, "read error\\n");
+         exit();
+         }
+         if(write(1, buf, n) != n){
+         fprintf(2, "write error\\n");
+         exit();
+         }
+         }
+         ''' | code }}
+         
+         <p>The important thing to note in the code fragment is that cat doesn’t know whether it
+           is reading from a file, console, or a pipe. Similarly cat doesn’t know whether it is
+           printing to a console, a file, or whatever. The use of file descriptors and the convention
+           that file descriptor 0 is input and file descriptor 1 is output allows a simple implementation
+           of cat.</p>
   <p>The close system call releases a file descriptor, making it free for reuse by a future
     open, pipe, or dup system call (see below). A newly allocated file descriptor is always
     the lowest-numbered unused descriptor of the current process.</p>
@@ -311,18 +310,17 @@ for(;;) {
     the new program. Here is a simplified version of the code a shell runs for the
     command cat &lt input.txt:</p>
 
-  <code><pre>
-char *argv[2];
+  {{'''
+  char *argv[2];
 
-argv[0] = "cat";
-argv[1] = 0;
-if(fork() == 0) {
+  argv[0] = "cat";
+  argv[1] = 0;
+  if(fork() == 0) {
   close(0);
   open("input.txt", O_RDONLY);
   exec("cat", argv);
-}
-  </code></pre>
-  
+  }
+  '''|code}}
   <p>
     After the child closes file descriptor 0, open
     is guaranteed to use that file descriptor for
@@ -352,21 +350,21 @@ if(fork() == 0) {
     have to understand how to redirect I/O.
   </p>
   <p>
-    Although <a href="javascript:gotoLine(2580);">fork</a> copies the file descriptor
+    Although {{ "fork" | goto_line }}  copies the file descriptor
     table, each underlying file offset is shared
     between parent and child. Consider this
     example:
   </p>
   
-  <code><pre>
-if(fork() == 0) {
+  {{'''
+  if(fork() == 0) {
   write(1, "hello ", 6);
   exit();
-} else {
+  } else {
   wait();
-  write(1, "world\n", 6);
-}
-  </code></pre>
+  write(1, "world\\n", 6);
+  }
+  '''|code}}
   
   <p>
     At the end of this fragment, the file attached
@@ -377,40 +375,37 @@ if(fork() == 0) {
   </p>
   
   <pre>
-(echo hello; echo world) &gt output.txt
+    (echo hello; echo world) &gt output.txt
   </pre>
   
   <p>
     The <a href="javascript:gotoLine(6118);">dup</a> system call duplicates an existing
     file descriptor, returning a new one that refers to the same
     underlying I/O object. Both file descriptors share an offset, just as
-    the file descriptors duplicated by <a href="javascript:gotoLine(2580);">fork</a> do. This is another way to
+    the file descriptors duplicated by {{ "fork" | goto_line }}  do. This is another way to
     write hello world into a file:
   </p>
-  <code><pre>
-fd = dup(1);
-write(1, "hello ", 6);
-write(fd, "world\n", 6);
-  </code></pre>
-
+  
+  {{'''
+  fd = dup(1);
+  write(1, "hello ", 6);
+  write(fd, "world\\n", 6);
+  '''|code}}
   
   <p>
-    Two file descriptors share an offset if they
-    were derived from the same original file
-    descriptor by a sequence of <a href="javascript:gotoLine(2580);">fork</a> and dup
-    calls. Otherwise file descriptors do not share
-    offsets, even if they resulted from open calls
-    for the same file. Dup allows shells to
-    implement commands like this: <code>ls existing-file
-      non-existing-file > tmp1 2>&1</code>. The <code>2>&1</code> tells
-  the shell to give the command a file
-  descriptor 2 that is a duplicate of descriptor
-  1. Both the name of the existing file and the
-  error message for the non-existing file will
-  show up in the file <code>tmp1</code>. The xv6 shell
-  doesn’t support I/O redirection for the error
-  file descriptor, but now you know how to
-  implement it.
+    Two file descriptors share an offset if they were derived from the
+    same original file descriptor by a sequence of {{ "fork" | goto_line }}
+    and dup calls. Otherwise file descriptors do not
+    share offsets, even if they resulted from open calls for the same
+    file. Dup allows shells to implement commands like this:
+    <code>ls existing-file non-existing-file &gt tmp1
+      2 &gt &1</code>. The <code>2 &gt &1</code> tells the shell to give
+    the command a file descriptor 2 that is a duplicate of
+    descriptor 1. Both the name of the existing file and the error
+    message for the non-existing file will show up in the
+    file <code>tmp1</code>. The xv6 shell doesn’t support I/O
+    redirection for the error file descriptor, but now you know how
+    to implement it.
   </p>
   <p>
     File descriptors are a powerful abstraction,
@@ -421,7 +416,8 @@ write(fd, "world\n", 6);
   </p>
 
 
-  <h3>Pipes</h3>
+  {{ "Pipes" | section }}
+
   <p>
     A <a href="javascript:gotoLine(6551);">pipe</a> is a small kernel buffer exposed to
     processes as a pair of file descriptors,
@@ -438,31 +434,31 @@ write(fd, "world\n", 6);
     with standard input connected to the read end of a pipe.
   </p>
 
-  <code><pre>
-int p[2];
-char *argv[2];
+  {{'''
+  int p[2];
+  char *argv[2];
 
-argv[0] = "wc";
-argv[1] = 0;
+  argv[0] = "wc";
+  argv[1] = 0;
 
-pipe(p);
-if(fork() == 0) {
+  pipe(p);
+  if(fork() == 0) {
   close(0);
   dup(p[0]);
   close(p[0]);
   close(p[1]);
   exec("/bin/wc", argv);
-} else {
+  } else {
   close(p[0]);
-  write(p[1], "hello world\n", 12);
+  write(p[1], "hello world\\n", 12);
   close(p[1]);
-}
-  </code></pre>
-  
+  }
+  '''|code}}
+
   <p>
     The program calls pipe, which creates a new
     pipe and records the read and write file
-    descriptors in the array p. After <a href="javascript:gotoLine(?);">fork</a>, both
+    descriptors in the array p. After {{ "fork" | goto_line }}, both
     parent and child have file descriptors
     referring to the pipe. The child dups the read
     end onto file descriptor 0, closes the file
@@ -472,7 +468,7 @@ if(fork() == 0) {
     pipe, writes to the pipe, and then closes the
     write side.
   </p>
-  
+
   <p>
     If no data is available, a on a pipe waits for
     either data to be written or all file descriptors
@@ -487,9 +483,9 @@ if(fork() == 0) {
     end-of-file.
   </p>
   <p>The xv6 shell implements pipelines such as</p>
-  
+
   <code><pre> fork sh.c | wc -l </code></pre>                    
-  
+
   <p>
     in a manner similar to the above code <a href="javascript:gotoLine(8650);">(8650)</a>. The child
     process creates a pipe to connect the left end of
@@ -512,12 +508,12 @@ if(fork() == 0) {
     Pipes may seem no more powerful than temporary
     files: the pipeline
   </p>
-  
+
   <code><pre> echo hello world | wc </code></pre>
-  
+
 
   <p>could be implemented without pipes as</p>
-  
+
   <code><pre> echo hello world &gt /tmp/xyz; wc &lt /tmp/xyz </code></pre>
 
   <p>
@@ -537,11 +533,9 @@ if(fork() == 0) {
     efficient than the non-blocking semantics of
     files.
   </p>
-  
 
+  {{ "File System" | section }}
 
-  <h3>§ File system</h3>
-  
   <p>
     The xv6 file system provides data files, which are
     uninterpreted byte arrays, and directories, which
@@ -560,214 +554,216 @@ if(fork() == 0) {
     the same file (assuming all the directories
     involved exist):
   </p>
-  
+
+  {{'''
+  chdir("/a");
+  chdir("b");
+  open("c", O_RDONLY);
+
+  open("/a/b/c", O_RDONLY);
+  '''| code}}
+
+
+  <p>
+    The first fragment changes the process’s current
+    directory to /a/b; the second neither refers to
+    nor changes the process’s current directory.
+  </p>
+
+  <p>
+    There are multiple system calls to create a new
+    file or directory: <a href="javascript:gotoLine(6451);">mkdir</a> creates
+    a new directory, open with the <b>O_CREATE</b> flag
+    creates a new data file, and <a href="javascript:gotoLine(6467);">mknod</a> creates a new
+    device file. This example illustrates all three:
+  </p>
+
+  {{'''
+  mkdir("/dir");
+  fd = open("/dir/file", O_CREATE|O_WRONLY);
+  close(fd);
+  mknod("/console", 1, 1);
+  ''' | code }}
+
+  <p>
+    Mknod creates a file in the file system, but the
+    file has no contents. Instead, the file’s metadata
+    marks it as a device file and records the major
+    and minor device numbers (the two arguments to
+    mknod), which uniquely identify a kernel
+    device. When a process later opens the file, the
+    kernel diverts read and write system calls to the
+    kernel device implementation instead of passing
+    them to the file system.  fstat retrieves
+    information about the object a file descriptor
+    refers to. It fills in a struct stat, defined in
+    stat.h as:
+  </p>
+
+  {{'''
+  #define T_DIR 1   // Directory
+  #define T_FILE 2  // File
+  #define T_DEV 3   // Device
+
+  struct stat {
+  short type;  // Type of file
+  int dev;     // File system’s disk device
+  uint ino;    // Inode
+  number short nlink; // Number of links to file
+  uint size;          // Size of file in bytes
+  };
+  '''|code}}
+
+  <p> A file's name is distinct from the file
+    itself; the same underlying file, called an
+    <i>inode</i> , can have multiple names,
+    called 
+    .italic-index links .
+    The
+    <code>link</code>
+    system call creates another file system name 
+    referring to the same inode as an existing file.
+    This fragment creates a new file named both
+    <code>a</code>
+    and
+    <code>b</code> .
+  </p>
+
+
+  {{'''
+  open("a", O_CREATE|O_WRONLY);
+  link("a", "b");
+  '''|code}}
+
+
+  <p>
+    Reading from or writing to
+    <code>a</code> is the same as reading from or
+    writing to <code>b</code>. Each inode is
+    identified by a unique <i>inode number</i>.  After
+    the code sequence above, it is possible to determine
+    that <code>a</code> and <code>b</code> refer to the
+    same underlying contents by inspecting the result of
+    <code>fstat</code>: both will return the same inode number 
+    <code>(ino),</code> and the <code>nlink</code> count
+    will be set to 2.
+
+  <p>
+    The <code>unlink</code> system call removes a name
+    from the file system.  The file's inode and the disk
+    space holding its content are only freed when the
+    file's link count is zero and no file descriptors
+    refer to it. Thus adding
+  </p>
+
   <code><pre>
- chdir("/a");
- chdir("b");
- open("c", O_RDONLY);
- 
- open("/a/b/c", O_RDONLY);
-            </code></pre>
-            
+      unlink("a");
+  </code></pre>                   
+  
+  <p> to the last code sequence leaves the inode and
+    file content accessible as <code>b</code> .
+    Furthermore,
+  </p>
+  
+  {{'''
+  fd = open("/tmp/xyz", O_CREATE|O_RDWR);
+  unlink("/tmp/xyz");
+  '''|code}}
+  
+  <p>
+    is an idiomatic way to create a temporary inode 
+    that will be cleaned up when the process closes 
+    <code>fd</code>
+    or exits.
+  </p>
 
-            <p>
-              The first fragment changes the process’s current
-              directory to /a/b; the second neither refers to
-              nor changes the process’s current directory.
-            </p>
-            
-            <p>
-              There are multiple system calls to create a new
-              file or directory: <a href="javascript:gotoLine(6451);">mkdir</a> creates
-              a new directory, open with the <b>O_CREATE</b> flag
-              creates a new data file, and <a href="javascript:gotoLine(6467);">mknod</a> creates a new
-              device file. This example illustrates all three:
-            </p>
+  <p>
+    Shell commands for file system operations are
+    implemented as user-level programs such as
+    <code>mkdir</code>, <code>ln</code>, <code>rm</code>,
+    etc. This design allows anyone to extend the shell
+    with new user commands by just adding a new
+    user-level program.  In hindsight this plan seems
+    obvious, but other systems designed at the time of
+    Unix often built such commands into the shell (and
+    built the shell into the kernel).
+  </p>
 
-            <code><pre>
- mkdir("/dir");
- fd = open("/dir/file", O_CREATE|O_WRONLY);
- close(fd);
- mknod("/console", 1, 1);
-            </code></pre>
-            
-            <p>
-              Mknod creates a file in the file system, but the
-              file has no contents. Instead, the file’s metadata
-              marks it as a device file and records the major
-              and minor device numbers (the two arguments to
-              mknod), which uniquely identify a kernel
-              device. When a process later opens the file, the
-              kernel diverts read and write system calls to the
-              kernel device implementation instead of passing
-              them to the file system.  fstat retrieves
-              information about the object a file descriptor
-              refers to. It fills in a struct stat, defined in
-              stat.h as:
-            </p>
-            
-            <code><pre>
- #define T_DIR 1   // Directory
- #define T_FILE 2  // File
- #define T_DEV 3   // Device
+  <p>
+    One exception is <code>cd</code>, which is built into the shell {{
+    8716 | line }} <code>cd</code> must change the current working
+    directory of the shell itself.  If <code>cd</code> were run as a
+    regular command, then the shell would fork a child process, the
+    child process would run <code>cd</code>, and <code>cd</code> would
+    change the <i>child's</i> working directory. The parent's (i.e., the
+    shell's) working directory would not change.
+  </p>
 
- struct stat {
-     short type;  // Type of file
-     int dev;     // File system’s disk device
-     uint ino;    // Inode
-     number short nlink; // Number of links to file
-     uint size;          // Size of file in bytes
- };
-            </code></pre>
-            
-            <p> A file's name is distinct from the file
-              itself; the same underlying file, called an
-              <i>inode</i> , can have multiple names,
-              called 
-              .italic-index links .
-              The
-              <code>link</code>
-              system call creates another file system name 
-              referring to the same inode as an existing file.
-              This fragment creates a new file named both
-              <code>a</code>
-              and
-              <code>b</code> .
-            </p>
+  <br>
+  {{ "Real world" |section}}</h4>
 
-            <code><pre>                
- open("a", O_CREATE|O_WRONLY);
- link("a", "b");
-            </code></pre>
+<p>
+  Unix's combination of the "standard" file
+  descriptors, pipes, and convenient shell syntax for
+  operations on them was a major advance in writing
+  general-purpose reusable programs.
+  The idea sparked a whole culture of "software tools" that was
+  responsible for much of Unix's power and popularity,
+  and the shell was the first so-called "scripting language."
+  The Unix system call interface persists today in systems like
+  BSD, Linux, and Mac OS X.
+</p>
 
-            
-            <p>
-              Reading from or writing to
-              <code>a</code> is the same as reading from or
-              writing to <code>b</code>. Each inode is
-              identified by a unique <i>inode number</i>.  After
-              the code sequence above, it is possible to determine
-              that <code>a</code> and <code>b</code> refer to the
-              same underlying contents by inspecting the result of
-              <code>fstat</code>: both will return the same inode number 
-              <code>(ino),</code> and the <code>nlink</code> count
-              will be set to 2.
+<p>
+  The Unix system call interface has been standardized through the Portable
+  Operating System Interface (POSIX) standard. Xv6 is <i>not</i>
+  POSIX compliant.  It misses system calls (including basic ones such as
+  <code>lseek</code>), it implements systems calls
+  only partially, etc.  Our main goals for xv6 are
+  simplicity and clarity while providing a simple
+  UNIX-like system-call interface.  Several people
+  have extended xv6 with a few more basic system calls
+  and a simple C library so that they can run basic
+  Unix programs.  Modern kernels, however, provide
+  many more system calls, and many more kinds of
+  kernel services, than xv6.  For example, they
+  support networking, windowing systems, user-level
+  threads, drivers for many devices, and so on.
+  Modern kernels evolve continuously and rapidly, and
+  offer many features beyond POSIX.
+</p>
 
-            <p>
-              The <code>unlink</code> system call removes a name
-              from the file system.  The file's inode and the disk
-              space holding its content are only freed when the
-              file's link count is zero and no file descriptors
-              refer to it. Thus adding </p>
+<p>
+  For the most part, modern Unix-derived operating
+  systems have not followed the early Unix model of
+  exposing devices as special files, like the
+  <code>console</code> device file discussed above.
+  The authors of Unix went on to build Plan 9, which
+  applied the "resources are files" concept to modern
+  facilities, representing networks, graphics, and
+  other resources as files or file trees.
+</p>
 
-            <code><pre>
- unlink("a");
-            </code></pre>                   
-            
-            <p> to the last code sequence leaves the inode and
-              file content accessible as <code>b</code> .
-              Furthermore,
-            </p>
-            
-            <code><pre>
- fd = open("/tmp/xyz", O_CREATE|O_RDWR);
- unlink("/tmp/xyz");
-            </code></pre>
+<p>
+  The file system abstraction has been a powerful
+  idea. Even so, there are other models for operating
+  system interfaces.  Multics, a predecessor of Unix,
+  abstracted file storage in a way that made it look
+  like memory, producing a very different flavor of
+  interface. The complexity of the Multics design had
+  a direct influence on the designers of Unix, who
+  tried to build something simpler.
+</p>
 
-            <p>
-              is an idiomatic way to create a temporary inode 
-              that will be cleaned up when the process closes 
-              <code>fd</code>
-              or exits.
-            </p>
-
-            <p>
-              Shell commands for file system operations are
-              implemented as user-level programs such as
-              <code>mkdir</code>, <code>ln</code>, <code>rm</code>,
-              etc. This design allows anyone to extend the shell
-              with new user commands by just adding a new
-              user-level program.  In hindsight this plan seems
-              obvious, but other systems designed at the time of
-              Unix often built such commands into the shell (and
-              built the shell into the kernel).
-            </p>
-
-            <p>
-              One exception is <code>cd</code>, which is built into the shell <a href="javascript:gotoLine(8716);">(8716)</a></p>                
-            <code>cd</code> must change the current working
-            directory of the shell itself.  If <code>cd</code>
-            were run as a regular command, then the shell would
-            fork a child process, the child process would run
-            <code>cd</code> , and  <code>cd</code> would change the 
-            <i>child's</i> working directory. The parent's (i.e.,
-            the shell's) working directory would not change.
-            </p>
-            
-            <br>
-            <h4>§ Real world</h4>
-
-            <p>
-              Unix's combination of the "standard" file
-              descriptors, pipes, and convenient shell syntax for
-              operations on them was a major advance in writing
-              general-purpose reusable programs.
-              The idea sparked a whole culture of "software tools" that was
-              responsible for much of Unix's power and popularity,
-              and the shell was the first so-called "scripting language."
-              The Unix system call interface persists today in systems like
-              BSD, Linux, and Mac OS X.
-            </p>
-
-            <p>
-              The Unix system call interface has been standardized through the Portable
-              Operating System Interface (POSIX) standard. Xv6 is <i>not</i>
-              POSIX compliant.  It misses system calls (including basic ones such as
-              <code>lseek</code>), it implements systems calls
-              only partially, etc.  Our main goals for xv6 are
-              simplicity and clarity while providing a simple
-              UNIX-like system-call interface.  Several people
-              have extended xv6 with a few more basic system calls
-              and a simple C library so that they can run basic
-              Unix programs.  Modern kernels, however, provide
-              many more system calls, and many more kinds of
-              kernel services, than xv6.  For example, they
-              support networking, windowing systems, user-level
-              threads, drivers for many devices, and so on.
-              Modern kernels evolve continuously and rapidly, and
-              offer many features beyond POSIX.
-            </p>
-            
-            <p>
-              For the most part, modern Unix-derived operating
-              systems have not followed the early Unix model of
-              exposing devices as special files, like the
-              <code>console</code> device file discussed above.
-              The authors of Unix went on to build Plan 9, which
-              applied the "resources are files" concept to modern
-              facilities, representing networks, graphics, and
-              other resources as files or file trees.
-            </p>
-
-            <p>
-              The file system abstraction has been a powerful
-              idea. Even so, there are other models for operating
-              system interfaces.  Multics, a predecessor of Unix,
-              abstracted file storage in a way that made it look
-              like memory, producing a very different flavor of
-              interface. The complexity of the Multics design had
-              a direct influence on the designers of Unix, who
-              tried to build something simpler.
-            </p>
-            
-            <p>
-              This book examines how xv6 implements its Unix-like
-              interface, but the ideas and concepts apply to more
-              than just Unix. Any operating system must multiplex
-              processes onto the underlying hardware, isolate
-              processes from each other, and provide mechanisms
-              for controlled inter-process communication.  After
-              studying xv6, you should be able to look at other,
-              more complex operating systems and see the concepts
-              underlying xv6 in those systems as well.
-            </p>
+<p>
+  This book examines how xv6 implements its Unix-like
+  interface, but the ideas and concepts apply to more
+  than just Unix. Any operating system must multiplex
+  processes onto the underlying hardware, isolate
+  processes from each other, and provide mechanisms
+  for controlled inter-process communication.  After
+  studying xv6, you should be able to look at other,
+  more complex operating systems and see the concepts
+  underlying xv6 in those systems as well.
+</p>
+</div>
