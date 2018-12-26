@@ -1,0 +1,16 @@
+
+
+* xv6-explora
+#+CAPTION: current status
+[[./img/preview1.gif]]
+
+This project unifies the xv6 source and the xv6 book into a
+side-by-side format with the goal of reducing the cost of context
+switches, or in the parlance of curriculum science: extranious load.
+
+more on that in the paper [[https://openlearning.mit.edu/sites/default/files/CognitiveScienceOf%20Learning-ConceptsAndStrategiesForTheEducatoR%20AndLearner.PDF][The Cognitive Science of Learning: Concepts and
+Strategies for the Educator and Learner]].
+
+xv6-explora also supports fine grained, sentence-by-sentence
+text-to-speech with keyboard controls utilizing html5 built-in voice
+for low latency.  
