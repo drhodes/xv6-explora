@@ -1,0 +1,40 @@
+      #editor { 
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          height: 500px; 
+      }
+
+      .myMarker {
+          position:absolute;
+          background:rgba(200,200,100,0.4);
+          z-index:20
+      }
+      
+      p {
+          padding: 8px;
+      }
+      
+	  p::selection {
+		  background: #88888833;
+	  }
+
+      code {
+          color:rgba(0,0,0,1);
+          background-color:rgba(235,235,235,1);          
+      }
+      code::selection {
+	      background: #88888833;
+      }
+
+      
+	  a::selection {
+		  background: #8888ff66;
+	  }
+
+      
+      .popover {
+          max-width: 800px;
+      }
