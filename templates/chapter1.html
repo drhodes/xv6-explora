@@ -577,13 +577,8 @@
     values are a
     <code>struct trapframe</code> 
     which stores the user registers. Now the new process's kernel stack is
-    completely prepared as shown in             
-
-    <a class="popoverOption" href="#fig1-4" data-content="<img src='figs/fig1-4.jpg' alt='figure 1-4'>"
-       rel="popover" data-placement="bottom" data-original-title="Figure 1-4">Figure 1-4</a>.
-
+    completely prepared as shown in {{"newkernelstack"|figref}}
   </p>
-
 
   <p>
     The first process is going to execute a small program
@@ -592,21 +587,16 @@
     program, the program needs to be copied to that memory,
     and the process needs a page table that maps user-space addresses to
     that memory.
-    
   </p>
   <p>
-    
-    <code>userinit</code> calls <code><a href="javascript:gotoLine(1818);">setupkvm</a></code>
-    to create a page table for the process with (at first) mappings
-    only for memory that the kernel uses.
-    We will study this function in detail in Chapter 2, but
-    at a high level <code>setupkvm</code> and <code>userinit </code> 
-    create an address space
-    as shown in
+    <code>userinit</code> calls {{"setupkvm"|goto_line}} to create a
+    page table for the process with (at first) mappings only for
+    memory that the kernel uses.  We will study this function in
+    detail in Chapter 2, but at a high level  {{"setupkvm"|goto_line}}
+    and <code>userinit </code> create an address space as shown in
 
     <a class="popoverOption" href="#fig1-2" data-content="<img src='figs/fig1-2.jpg' alt='figure 1-2'>"
        rel="popover" data-placement="bottom" data-original-title="Figure 1-2">Figure 1-2</a>.
-
   </p>
 
   <p>
