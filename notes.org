@@ -1,3 +1,9 @@
+* errata
+page 30: "because kernel" -> "because the kernel"
+page 33: "it store" -> "it stores"
+page 33: "kinit uses P2V(PHYSTOP)" -> "kinit2 uses P2V(PHYSTOP)"
+
+
 * Selecting a sentence within a paragraph.
 
 Holy crap.
@@ -45,3 +51,5 @@ tmp.innerHTML
  
 
 * So What's the problem?
+
+
