@@ -37,6 +37,9 @@
           <li class="nav-item active">
             <a class="nav-link" href="https://github.com/mit-pdos/xv6-book/blob/master/LICENSE">INSTRUCTIONS<span class="sr-only">(current)</span></a>
           </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="" data-toggle="modal" data-target="#exampleModalCenter">Keyboard Shortcuts<span class="sr-only">(current)</span></a>
+          </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
           <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
@@ -44,10 +47,51 @@
         </form>
       </div>
     </nav>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+      Launch demo modal
+    </button>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Keyboard shortcuts</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <div id="table1"></div>            
+              <table class="table table-sm">
+                <tr> <td><b>Key</b></td> <td><b>Function</b></td> </tr>
+                <tr><td>h</td><td> Show this shortcut menu </td></tr>
+                <tr><td>j</td><td> Goto next sentence and speak it </td></tr>
+                <tr><td>k</td><td> Goto previous sentence and speak it </td></tr>
+                <tr><td>s</td><td> Speak sentence </td></tr>
+                <tr><td>+</td><td> Speed up voice</td></tr>
+                <tr><td>-</td><td> Slow down voice </td></tr>
+              </table>
+          </div>
+          <!-- <div class="modal-footer"> -->
+          <!--   <button type="button" class="btn btn-secondary" data-dismiss="modal">Done</button> -->
+          <!-- </div> -->
+        </div>
+      </div>
+    </div>
+
+
+
     
     <div class="container-fluid"> 
       <div class="row">
-        <div class="col-7"> <div class="sticky-top"> <div id="editor"> </div> </div> </div>
+        <div id="editor-col" class="col-7">
+          <div class="sticky-top">
+            <div id="editor"> </div>
+          </div>
+        </div>
         <div class="col-5" >
           <i> This website repackages a book and corresponding
             source code to xv6, each of which can be found through
