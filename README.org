@@ -1,5 +1,4 @@
 
-
 * xv6-explora
 progress: 2/9
 
@@ -25,5 +24,5 @@ easier to just use troff, so why the switch away from troff?
 
 Paragraph tags. That's it. I started building a separate set of troff
 macros but couldn't figure out how to reliable capture paragraphs with
-the .PP macro.  Paragraphs need to be unambiguous for the screen
-reader to split on sentences.
+the .PP macro. Paragraphs need to be unambiguous for the screen
+reader to split on sentences. 

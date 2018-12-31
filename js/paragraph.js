@@ -3,21 +3,12 @@
 
 TODO -----------------------------------------------------------------------------------------------
 
-When the mouse enters the editor, some events must be unregistered.
-
-when using the search facility of aceedit "j" and "k" are used in
-search queries and are still mapped to the paragraph control UI. so.
-
-editor.onmouseenter unregister paragraph bindings.
-editor.onmouseleave register paragraph bindings.
-
-TODO -----------------------------------------------------------------------------------------------
-
 rollover figures should do the same as rollover figrefs because some
 of the figures are big and the reading column is small.
 
+TODO -----------------------------------------------------------------------------------------------
 
-
+Save current paragraph in localstorage for nexttime (bookmark)
 
 */
 
@@ -44,8 +35,7 @@ var mod = function(){
             }
         }
         
-        // add a predicate to know if a paragraph-relative-pos is in this
-        // node.
+        // is a paragraph-relative-pos is in this node.
         containsPos(pos) {
             return pos >= this.span[0] && pos < this.span[1];
         }
@@ -56,9 +46,10 @@ var mod = function(){
         }
     }
 
+    // ---------------------------------------------------------------------------------------------
     class Sentence {
-        // find a speakable sentence in the middle of a <p> nodes.
-        // there might be 5 sentences broken up over 3 nodes.
+        // find a speakable sentence winthin a <p> node.  There might
+        // be 5 sentences broken up over 3 child nodes.
         
         constructor(el, pos, txt) {
             this.el = el;
@@ -80,10 +71,10 @@ var mod = function(){
         }
         
         highlight() {
-            // get this!  <p>.childNodes can have more than one DOM
-            // element.  There might be [text, a, text] each of which
-            // contributes to the rendered text in a paragraph seen by the
-            // user. 
+            // <p>.childNodes can have more than one DOM element.
+            // There might be [text, a, text] each of which
+            // contributes to the rendered text in a paragraph seen by
+            // the user.
             let wrappedNode0 = this.nodeContainingPos(this.span[0]);
             let offset0 = wrappedNode0.getOffset(this.span[0]);
             
@@ -122,7 +113,6 @@ var mod = function(){
         }
     }
 
-
     // ---------------------------------------------------------------------------------------------
     class Paragraph {
         constructor(el, speed) {
@@ -134,14 +124,10 @@ var mod = function(){
             this.curSentenceIdx = 0;
             this.buildSentences();
             this.sentences[0].highlight();
-            // do
-            // this.highlight(true);
-            // this.scrollTo();
         }
 
         buildSentences() {
             const sep = ". ";
-            // var txt = this.el.textContent.replace("\n", "\n");
             var parts = this.el.textContent.split(sep);
             var pos = 0;
             
@@ -188,7 +174,6 @@ var mod = function(){
                 throw Error("trying to increment this.curSentenceIdx out of range");
             }
         }
-
         
         repeat() {
             this.synth.cancel();
@@ -199,7 +184,6 @@ var mod = function(){
             this.synth.cancel();
             this.sentences[this.curSentenceIdx].selectAndSpeak(this.speed);
         }
-
         
         scrollTo() {
             $('html, body').animate({
@@ -212,6 +196,11 @@ var mod = function(){
 
     // ---------------------------------------------------------------------------------------------
     class ParagraphSelector {
+        // TODO if clicking to bring focus to a new paragraph finds
+        // that the same paragraph is being focused, then don't
+        // refocus because doing so resets the current paragraph to 0,
+        // thus losing the reader's place.
+        
         constructor() {
             this.speed = 1;
             this.pels = $("p");
@@ -219,16 +208,8 @@ var mod = function(){
             this.curParagraph = new Paragraph(this.pels[0], this.speed);
             this.synth = window.speechSynthesis;
             this.lastMotion = undefined; // 
-            // setup click events.
+            // setup click events for all paragraphs.
             this.pels.click(e => this.selectClick(e.target));
-        }
-        
-        curPel() {
-            return this.pels[this.pidx];
-        }
-        
-        prevP() {
-            return this.pels[this.pidx > 0 ? this.pidx - 1 : this.pidx];
         }
         
         firstParagraph() {
@@ -250,8 +231,6 @@ var mod = function(){
                     this.pidx = i;                
                 }
             }
-            console.log(this.pidx);
-            // this.curParagraph.highlight(false);
             this.curParagraph = new Paragraph(pel, this.speed);
         }
         
@@ -267,12 +246,11 @@ var mod = function(){
             } else if (!this.curParagraph.atBottom()) {
                 this.curParagraph.nextSentence();
             } else if (this.curParagraph.atBottom() && this.lastParagraph()) {
-                console.log("End of chapter");
+                console.log("End of book.");
             } else {
                 console.log("unhandled case in select next sentence");
             }
             this.curParagraph.speak();
-            
         }
         
         selectPrevSentence() {
@@ -314,54 +292,60 @@ var mod = function(){
             this.curParagraph.repeat();
         }
 
+        enableKeyEvents(enable) {
+            $(document).unbind('keydown');
+            if (enable) {
+                $(document).keydown((event) => {
+                    switch(event.keyCode) {
+                         
+                    case 27: { // escape key
+                        this.stop();
+                        break;
+                    }
+                    case 74: { // j
+                        this.selectNextSentence();
+                        break;
+                    }
+                    case 75: { // k
+                        this.selectPrevSentence();
+                        break;
+                    }
+                    case 83: { // s
+                        this.speakCurrentSentence();
+                        break;
+                    }
+                    case 187: { // +
+                        this.increaseSpeed();
+                        break;
+                    }
+                    case 189: { // -
+                        this.decreaseSpeed();
+                        break;
+                    }
+                    case 191:  // ?
+                    case 72: { // h
+                        // TODO rename this modal to something like keyshortcut help.
+                        $('#exampleModalCenter').modal('show');
+                    }
+                    } // end switch
+                });
+            }
+        }
     }
-
-
-
-
-
     
-    var __paragraphSelector = new ParagraphSelector();
-    $(document).keydown(function(event){
-        if (event.keyCode == 74) {
-            __paragraphSelector.selectNextSentence();
-        }
-        if (event.keyCode == 75) {
-            __paragraphSelector.selectPrevSentence();
-        }
-        if (event.keyCode == 187) {            
-            __paragraphSelector.increaseSpeed();
-        }
-        if (event.keyCode == 189) {            
-            __paragraphSelector.decreaseSpeed();
-        }
-        if (event.keyCode == 27) {            
-            __paragraphSelector.stop();
-        }
-        if (event.keyCode == 83) {            
-            __paragraphSelector.speakCurrentSentence();
-        }
-    });
-
-    var dbg = undefined;
-
-    function foo() {
-        let temp = $("p")[9];
-        console.log(temp);
-        let node0 = temp.childNodes[0];
-        let node1 = temp.childNodes[1].childNodes[0];
-        console.log(["node1 text: ", node1.textContent]);
-        // console.log(node0);
-        console.log(node1);
-        dbg = temp.childNodes[1];
-        let range0 = document.createRange();
-        let selection = window.getSelection();
-        
-        selection.removeAllRanges();
-        
-        range0.setStart(node0, 0);
-        range0.setEnd(node1, node1.textContent.length);
-        selection.addRange(range0);
-    }
-
+    var paragraphSelector = new ParagraphSelector();
+    paragraphSelector.enableKeyEvents(true);
+    
+    // when the mouse is over the editor, unbind the key events so the
+    // editor works as expected.
+    
+    $("#editor-col").hover(
+        function(el) {
+            paragraphSelector.enableKeyEvents(false);
+        },
+        function(p){ 
+            paragraphSelector.enableKeyEvents(true);
+        });
+    
+    return paragraphSelector;
 }();

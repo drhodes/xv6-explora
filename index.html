@@ -67,7 +67,8 @@
               <div id="table1"></div>            
               <table class="table table-sm">
                 <tr> <td><b>Key</b></td> <td><b>Function</b></td> </tr>
-                <tr><td>h</td><td> Show this shortcut menu </td></tr>
+                <tr><td>h or ?</td><td> Show this modal </td></tr>
+                <tr><td>esc</td><td> Hide this modal </td></tr>
                 <tr><td>j</td><td> Goto next sentence and speak it </td></tr>
                 <tr><td>k</td><td> Goto previous sentence and speak it </td></tr>
                 <tr><td>s</td><td> Speak sentence </td></tr>
@@ -146,15 +147,12 @@
           lastMarker = editor.session.addMarker(r, "myMarker", "fullLine");
           editor.scrollToLine(from, true, true);
       }
-
       
-     $(window).resize(function() {
-         $("#editor").css("height", window.innerHeight);
-         console.log("resizing window");
-     });
-     
+      $(window).resize(function() {
+          $("#editor").css("height", window.innerHeight);
+          console.log("resizing window");
+      });
     </script>
-
     
     <script>
       var editor = ace.edit("editor");
@@ -192,7 +190,7 @@
           placement: 'left',
           html:true
       });
-      var gp = undefined;
+      
       $('p').hover(
           function(p) {
               p.target.style.backgroundColor = "#f8f8f8"
