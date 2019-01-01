@@ -283,10 +283,10 @@
   
   <p>
     The xv6 kernel maintains many pieces of state for each process,
-    which it gathers into a {{ "struct proc" | goto_line }}
-    A process's most important pieces of kernel state are its 
-    page table, its kernel stack, and its run state.
-    We'll use the notation <code>p->xxx</code> to refer to elements of the
+    which it gathers into a {{ "struct proc" | goto_line }} A
+    process's most important pieces of kernel state are its page
+    table, its kernel stack, and its run state.  We'll use the
+    notation <code>p->xxx</code> to refer to elements of the
     <code>proc</code> structure.
   </p>
   
@@ -417,34 +417,15 @@
 
   <p>
     Returning to
-    <a href="javascript:gotoLine(1044);"><code>entry</code></a>
-    it loads the physical address of
-    <code>entrypgdir</code>
-    into control register
-    <code>%cr3</code>.
-    The value in
-    <code>%cr3</code>
-    must be a physical address.
-    It wouldn't make sense for
-    <code>%cr3</code>
-    to hold the virtual address of
-    <code>entrypgdir</code>,
-    because the paging hardware 
-    doesn't know how to translate virtual addresses yet; it
-    doesn't have a page table yet.
-    The symbol
-    <code>entrypgdir</code>,
-    refers to an address in high memory,
-    and the macro
-    <a href="javascript:gotoLine(213);"><code>V2P_WO</code></a>
-    <!-- .line 'memlayout.h:/V2P_WO/'  -->
-    subtracts
-    <code>KERNBASE</code>
-    in order to find the physical address.
-    To enable the paging hardware, xv6 sets the flag
-    <a href="javascript:gotoLine(709);"><code>CR0_PG</code></a>
-    in the control register
-    <code>%cr0</code>
+    <a href="javascript:gotoLine(1044);"><code>entry</code></a> it loads the physical address of
+    <code>entrypgdir</code> into control register <code>%cr3</code>. The value in <code>%cr3</code>
+    must be a physical address. It wouldn't make sense for  <code>%cr3</code>  to hold the virtual address of
+    <code>entrypgdir</code>, because the paging hardware doesn't know how to translate virtual addresses yet; it
+    doesn't have a page table yet. The symbol   <code>entrypgdir</code>, refers to an address in high memory,
+    and the macro <a href="javascript:gotoLine(213);"><code>V2P_WO</code></a>
+    subtracts <code>KERNBASE</code> in order to find the physical address.
+    To enable the paging hardware, xv6 sets the flag <a href="javascript:gotoLine(709);"><code>CR0_PG</code></a>
+    in the control register <code>%cr0</code>
   </p>
 
   <p>
