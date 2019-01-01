@@ -70,24 +70,24 @@ macTable = {
     "PGROUNDUP": 798,
 }
 
-
 def register(f):
     ''' register each filter function with template environment.
     '''
     env.filters[f.__name__] = f
     return f
 
+GOTO_LINES_TEMPLATE = '<code><a onclick="event.stopPropagation()" href="javascript:gotoLines(%d, %d);">%s</a></code>'
+GOTO_LINE_TEMPLATE = '<code><a onclick="event.stopPropagation()" href="javascript:gotoLine(%d);">%s</a></code>'
+
 @register
 def goto_line(ident):
     #{{"fork" | goto_line}}
-    temp = '<code><a href="javascript:gotoLine(%d);">%s</a></code>'
-    return temp % (lineTable[ident], ident)
+    return GOTO_LINE_TEMPLATE % (lineTable[ident], ident)
 
 @register
 def goto_lines(ident, start, end):
     #{{"fork" | goto_line }}
-    temp = '<code><a href="javascript:gotoLines(%d, %d);">%s</a></code>'
-    return temp % (start, end, ident)
+    return GOTO_LINES_TEMPLATE % (start, end, ident)
 
 @register
 def section(title):
@@ -102,20 +102,16 @@ def chapter(title):
 @register
 def addr(addrName):
     # {{"KERNBASE" | addr}}
-    temp = '<code><a href="javascript:gotoLine(%d);">%s</a></code>'
-    return temp % (addrTable[addrName], addrName)
+    return GOTO_LINE_TEMPLATE % (addrTable[addrName], addrName)
 
 @register
 def macro(name):
     # {{"MACNAME" | addr}}
-    temp = '<code><a href="javascript:gotoLine(%d);">%s</a></code>'
-    return temp % (macTable[name], name)
-
+    return GOTO_LINE_TEMPLATE % (macTable[name], name)
 
 @register
 def sheet(name):
-    temp = '<code><a href="javascript:gotoLine(%d);">%s</a></code>'
-    return temp % (sheetTable[name], name)
+    return GOTO_LINE_TEMPLATE % (sheetTable[name], name)
 
 @register
 def figref(name):
@@ -145,26 +141,27 @@ def code(listing):
 
 @register
 def line(lineNum):
-    return '<a href="javascript:gotoLine(%d);">(%d)</a>' % (lineNum, lineNum)
+    smallLineNum = "<small>(%d)</small>" % lineNum
+    return GOTO_LINE_TEMPLATE % (lineNum, smallLineNum)
 
 @register
 def struct(structName):
     line = structTable[structName]
     if type(line) == tuple:
-        return '<code><a href="javascript:gotoLines(%d, %d);">%s</a></code>' % (line + (structName,))
+        return GOTO_LINES_TEMPLATE % (line + (structName,))
     else:
-        return '<code><a href="javascript:gotoLine(%d);">%s</a></code>' % (line, structName)
+        return GOTO_LINE_TEMPLATE % (line, structName)
 
 @register
 def appendix(name):
-    return '<a href="this will be a link">Appendix %s</a>' % name
+    return '<a onclick="event.stopPropagation()" href="this will be a link">Appendix %s</a>' % name
 
 @register
 def chapref(chapname):
     return {
-        "LOCK": "4"
+        "MEM": "3",
+        "LOCK": "4",
     }[chapname]
-
 
 @register
 def figure(caption, num):
