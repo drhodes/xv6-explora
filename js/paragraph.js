@@ -10,6 +10,8 @@ TODO ---------------------------------------------------------------------------
 
 Save current paragraph in localstorage for nexttime (bookmark)
 
+
+
 */
 
 var mod = function(){
@@ -128,7 +130,11 @@ var mod = function(){
 
         buildSentences() {
             const sep = ". ";
-            var parts = this.el.textContent.split(sep);
+            var txt = this.el.textContent;
+            txt = txt.replace('.\n', '. ');
+            //var parts = this.el.textContent.split(sep);
+            var parts = txt.split(sep); 
+            
             var pos = 0;
             
             parts.forEach(part => {
