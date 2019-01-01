@@ -10,3 +10,6 @@ work:
 build:
 	python3 build.py > temp.html
 	./reload-chrome.sh
+
+just-build:
+	python3 build.py > temp.html
