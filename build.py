@@ -1,33 +1,17 @@
 from jinja2 import Environment, FileSystemLoader #, select_autoescape
 from subprocess import Popen, PIPE
+from line_table import lineTable
 
 env = Environment(
     loader=FileSystemLoader('templates'),
     # autoescape=select_autoescape(['html', 'xml'])
 )
 
-lineTable = {
-    "fork": 2580,
-    "forkret": 2853,
-    "struct proc": 2337,
-    "entry": 1044,
-    "main": 1217,
-    "kvmalloc": 1840,
-    "setupkvm": 1818,
-    "mappages": 1760,
-    "walkpgdir": 1735,
-    "kinit1": 3131,
-    "kinit2": 3139,
-    "freerange": 3151,
-    "kfree": 3164,
-    "kalloc": 3187,
-    "sbrk": 3801,
-    "exec": 6610,
-}
-
 structTable = {
     "run": 3115,
-    "spin lock": (3119, 3123)
+    "spin lock": (3119, 3123),
+    "elfhdr": 905,
+    "proghdr": 924,
 }
 
 figrefTable = {
