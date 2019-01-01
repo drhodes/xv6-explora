@@ -276,7 +276,7 @@ var mod = function(){
         }
 
         decreaseSpeed() {
-            if (this.speed > 1) this.speed -= .2;
+            if (this.speed > .4) this.speed -= .2;
             this.curParagraph.updateSpeed(this.speed);
             this.curParagraph.repeat();
         }
