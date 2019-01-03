@@ -1,19 +1,11 @@
-<!-- talk a little about initial page table conditions: -->
-<!--     paging not on, but virtual mostly mapped direct to physical, -->
-<!--     which is what things look like when we turn paging on as well -->
-<!--     since paging is turned on after we create first process. -->
-<!--   mention why still have SEG_UCODE/SEG_UDATA? -->
-<!--   do we ever really say what the low two bits of %cs do? -->
-<!--     in particular their interaction with PTE_U -->
-<!--   sidebar about why it is extern char[] -->
+(load-file "../template-macros.el")
 
 
-<h1><a name="chapter1">CHAPTER 2</a></h1>
+<h1><a name="chapter2">CHAPTER 2</a></h1>
+
 {{"Page tables" | chapter}}
 
 <div>
-
-
 <p>
 Page tables are the mechanism through which the operating system
 controls what memory addresses mean.  They allow xv6 to multiplex the
@@ -31,7 +23,7 @@ to a real-world operating system, xv6's design is restrictive, but it
 does illustrate the key ideas.
 </p>
 
-{{"Paging hardware" | section}}
+{{"Paging hardware"|section}}
 
 <p>
 As a reminder, x86 instructions (both user and kernel) manipulate
@@ -355,7 +347,8 @@ this particular figure has name: "processlayout"
   space for the stack so that it can grow beyond one page.
 </p>
 
-  {{ "Code: sbrk" | section }}
+{{ "Code: sbrk" | section }}
+
 <p>
   <code>Sbrk</code> is the system call for a process to shrink or grow
   its memory. The system call is implemented by the function
@@ -401,11 +394,8 @@ this particular figure has name: "processlayout"
   The first step is a quick check that the file probably contains an
   ELF binary. An ELF binary starts with the four-byte "magic number"
   <code> 0x7F</code>, <code> 'E'</code>, <code> 'L'</code>, <code> 'F'</code>,
-  or
-  .code-index ELF_MAGIC .line elf.h:/ELF_MAGIC/ .
-  If the ELF header has the right magic number,
-  .code exec
-  assumes that the binary is well-formed.
+  or {{"ELF_MAGIC"|goto_line}}. If the ELF header has the right magic number,
+  {{"exec"|goto_line}} assumes that the binary is well-formed.
 </p>
 
 <p>
@@ -448,7 +438,6 @@ Program Header:
   file <code>init</code>.
 </p>
 
-
 <p>
   Now {{"exec"|goto_line}} allocates and initializes the user
   stack. It allocates just one stack page. <code>Exec</code> copies
@@ -461,98 +450,60 @@ Program Header:
 </p>
 
 <p>
-.code Exec
-places an inaccessible page just below the stack page,
-so that programs that try to use more than one page will fault.
-This inaccessible page also allows
-.code exec
-to deal with arguments that are too large;
-in that situation,
-the
-.code-index copyout
-.line vm.c:/^copyout/
-function that
-.code exec
-uses to copy arguments to the stack will notice that
-the destination page is not accessible, and will
-return \-1.
+  <code>Exec</code> places an inaccessible page just below the stack
+  page, so that programs that try to use more than one page will
+  fault.  This inaccessible page also allows {{"exec"|goto_line}} to
+  deal with arguments that are too large; in that situation, the
+  {{"copyout"|goto_line}} function that {{"exec"|goto_line}} uses to
+  copy arguments to the stack will notice that the destination page is
+  not accessible, and will return <code>-1</code>.
 </p>
 
 <p>
-
-During the preparation of the new memory image,
-if
-.code exec
-detects an error like an invalid program segment,
-it jumps to the label
-.code bad ,
-frees the new image,
-and returns \-1.
-.code Exec
-must wait to free the old image until it
-is sure that the system call will succeed:
-if the old image is gone,
-the system call cannot return \-1 to it.
-The only error cases in
-.code exec
-happen during the creation of the image.
-Once the image is complete,
-.code exec
-can install the new image
-.line exec.c:/switchuvm/
-and free the old one
-.line exec.c:/freevm/ .
-Finally,
-.code exec
-returns 0.
+  During the preparation of the new memory image, if
+  {{"exec"|goto_line}} detects an error like an invalid program
+  segment, it jumps to the label <code>bad</code>, frees the new image
+  and returns -1. <code>Exec</code> must wait to free the old image
+  until it is sure that the system call will succeed: if the old image
+  is gone, the system call cannot return -1 to it.  The only error
+  cases in {{"exec"|goto_line}} happen during the creation of the
+  image.  Once the image is complete, {{"exec"|goto_line}} can install
+  the new image {{6701|line}} and free the old one {{6702|line}}.{#
+  .line exec.c:/freevm/ #} Finally, {{"exec"|goto_line}} returns 0.
 </p>
 
 <p>
-
-.code Exec
-loads bytes from the ELF file into memory at addresses specified by the ELF file.
-Users or processes can place whatever addresses they want into an ELF file.
-Thus
-.code exec
-is risky, because the addresses in the ELF file may refer to the kernel, accidentally
-or on purpose. The consequences for an unwary kernel could range from
-a crash to a malicious subversion of the kernel's isolation mechanisms
-(i.e., a security exploit).
-xv6 performs a number of checks to avoid these risks.
-To understand the importance of these checks, consider what could happen
-if xv6 didn't check
-.code "if(ph.vaddr + ph.memsz < ph.vaddr)" .
-This is a check for whether the sum overflows a 32-bit integer.
-The danger is that a user could construct an ELF binary with a
-.code ph.vaddr
-that points into the kernel,
-and
-.code ph.memsz
-large enough that the sum overflows to 0x1000.
-Since the sum is small, it would pass the check
-.code "if(newsz >= KERNBASE)"
-in
-. code allocuvm .
-The subsequent call to 
-.code loaduvm
-passes
-.code ph.vaddr
-by itself, without adding
-.code ph.memsz 
-and without checking
-.code ph.vaddr
-against
-.code KERNBASE ,
-and would thus copy data from the ELF binary into the kernel.
-This could be exploited by a user
-program to run arbitrary user code with kernel privileges.  As this example
-illustrates, argument checking must be done with great care.
-It is easy for a kernel developer to omit a crucial check, and
-real-world kernels have a long history of missing checks whose absence
-can be exploited by user programs to obtain kernel privileges.  It is likely that xv6 doesn't do a complete job of validating
-user-level data supplied to the kernel, which a malicious user program might be able to exploit to circumvent xv6's isolation.
+  Exec loads bytes from the ELF file into memory at addresses
+  specified by the ELF file.  Users or processes can place whatever
+  addresses they want into an ELF file.  Thus {{"exec"|goto_line}} is
+  risky, because the addresses in the ELF file may refer to the
+  kernel, accidentally or on purpose. The consequences for an unwary
+  kernel could range from a crash to a malicious subversion of the
+  kernel's isolation mechanisms (i.e., a security exploit).  xv6
+  performs a number of checks to avoid these risks.  To understand the
+  importance of these checks, consider what could happen if xv6 didn't
+  check <code>if(ph.vaddr + ph.memsz < ph.vaddr)</code> This is a
+  check for whether the sum overflows a 32-bit integer.  The danger is
+  that a user could construct an ELF binary with
+  a <code>ph.vaddr</code> that points into the kernel,
+  and <code>ph.memsz</code> large enough that the sum overflows to
+  0x1000.  Since the sum is small, it would pass the
+  check <code>if(newsz >= KERNBASE)</code> in
+  {{"allocuvm"|goto_line}}. The subsequent call to
+  {{"loaduvm"|goto_line}} passes <code>ph.vaddr</code> by itself,
+  without adding <code>ph.memsz</code> and without
+  checking <code>ph.vaddr</code> against {{"KERNBASE"|goto_line}}, and
+  would thus copy data from the ELF binary into the kernel. This could
+  be exploited by a user program to run arbitrary user code with
+  kernel privileges.  As this example illustrates, argument checking
+  must be done with great care. It is easy for a kernel developer to
+  omit a crucial check, and real-world kernels have a long history of
+  missing checks whose absence can be exploited by user programs to
+  obtain kernel privileges.  It is likely that xv6 doesn't do a
+  complete job of validating user-level data supplied to the kernel,
+  which a malicious user program might be able to exploit to
+  circumvent xv6's isolation.
 </p>
-
 
 {{"Real world"|section}}
 
@@ -597,14 +548,15 @@ user-level data supplied to the kernel, which a malicious user program might be 
   granularity. For example, if a program uses only 8 kilobytes of
   memory, giving it a 4 megabytes physical page is wasteful. Larger
   pages make sense on machines with lots of RAM, and may reduce
-  overhead for page-table manipulation.  Xv6 uses super pages in one
-  place: the initial page table .line 'main.c:/^pde_t.entrypgdir.*=/'
-  .  The array initialization sets two of the 1024 PDEs, at indices
-  zero and 512 .code KERNBASE>>PDXSHIFT ), ( leaving the other PDEs
-  zero.  Xv6 sets the .code PTE_PS bit in these two PDEs to mark them
-  as super pages.  The kernel also tells the paging hardware to allow
-  super pages by setting the .code-index CR_PSE bit (Page Size
-  Extension) in .register cr4 .
+  overhead for page-table manipulation.
+
+  Xv6 uses super pages in one place: the initial page table
+  {{1306|line}} The array initialization sets two of the 1024 PDEs, at
+  indices zero and 512 <code>(KERNBASE>>PDXSHIFT)</code>, leaving the
+  other PDEs zero.  Xv6 sets the <code>PTE_PS</code> bit in these two
+  PDEs to mark them as super pages.  The kernel also tells the paging
+  hardware to allow super pages by setting the <code>CR_PSE</code> bit
+  (Page Size Extension) in <code>%cr4</code>.
 </p>
 
 <p>
@@ -615,14 +567,13 @@ user-level data supplied to the kernel, which a malicious user program might be 
   them; the second is to read the number of kilobytes of memory out of a
   known 16-bit location in the PC's non-volatile RAM; and the third is
   to look in BIOS memory for a memory layout table left as part of the
-  multiprocessor tables.  Reading the memory layout table is
-  complicated.
+  multiprocessor tables.  Reading the memory layout table is complicated.
 </p>
 
 <p>
   Memory allocation was a hot topic a long time ago, the basic
   problems being efficient use of limited memory and preparing for
-  unknown future requests; see Knuth.  Today people care more about
+  unknown future requests; see Knuth. Today people care more about
   speed than space-efficiency. In addition, a more elaborate kernel
   would likely allocate many different sizes of small blocks, rather
   than (as in xv6) just 4096-byte blocks; a real kernel allocator
@@ -670,20 +621,18 @@ user-level data supplied to the kernel, which a malicious user program might be 
 </p>
 
 <p>
-7. Delete the check
-.code "if(ph.vaddr + ph.memsz < ph.vaddr)"
-in
-.code exec.c ,
-and construct a user  program that exploits that the check is missing.
+  7. Delete the check <code>if(ph.vaddr + ph.memsz &lt ph.vaddr)</code> in
+  {{"exec.c"|sheet}}, and construct a user program that exploits that
+  the check is missing.
 </p>
 
 <p>
-8. Change xv6 so that user processes run with only a minimal part of the kernel
-mapped and so that the kernel runs with its own page table that doesn't include
-the user process.
+  8. Change xv6 so that user processes run with only a minimal part of the kernel
+  mapped and so that the kernel runs with its own page table that doesn't include
+  the user process.
 </p>
 
 <p>
-9. How would you improve xv6's memory layout if xv6 where running on a 64-bit
-processor?
+  9. How would you improve xv6's memory layout if xv6 where running on a 64-bit
+  processor?
 </p>
