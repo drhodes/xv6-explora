@@ -240,6 +240,12 @@ def figure(caption, num):
     '''
     return temp % (num, num, num, caption)
 
+@register
+def reg(r):
+    # do fancy register info.
+    desc = x86reg.regTable.get(r, "UNKNOWN REGISTER")
+    return x86reg.REG_TEMPLATE % (desc, "%" + r)
+
 def main():
     template = env.get_template("index.html")
     print (template.render())    
