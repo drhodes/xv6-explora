@@ -1,14 +1,15 @@
 <div> <!-- chapter 0 -->
   <h1><a name="chapter0">CHAPTER 0</a></h1>
   {{ "Operating System Interfaces" | chapter }}
-  <p class="lead">
+  <p>
     The job of an operating system is to share a computer among multiple programs
     and to provide a more useful set of services than the hardware alone supports. The
     operating system manages and abstracts the low-level hardware, so that, for example, a
     word processor need not concern itself with which type of disk hardware is being
     used. It also shares the hardware among multiple programs so that they run (or appear
     to run) at the same time. Finally, operating systems provide controlled ways for
-    programs to interact, so that they can share data or work together. </p>          
+    programs to interact, so that they can share data or work together.
+  </p>          
   <p>
     An operating system provides services to user programs through an
     interface.  Designing a good interface turns out to be difficult. On
@@ -17,7 +18,8 @@
     other hand, we may be tempted to offer many sophisticated features to
     applications. The trick in resolving this tension is to design
     interfaces that rely on a few mechanisms that can be combined to
-    provide much generality. </p>          
+    provide much generality.
+  </p> 
   <p>  
     This book uses a single operating system as a concrete example to illustrate operating
     system concepts. That operating system, xv6, provides the basic interfaces introduced
@@ -78,27 +80,30 @@
     have a variety of shells to choose from, each with its own
     user interface and scripting features. The xv6 shell is a
     simple implementation of the essence of the Unix Bourne
-    shell. Its implementation can be found at line <a href="javascript:gotoLine(8550)">8550</a>.</p>
+    shell. Its implementation can be found at line {{8550|line}}.
+  </p>
 
   {{ "Processes and memory" | section }}
   
-  <p> An xv6 process consists of user-space memory
+  <p>
+    An xv6 process consists of user-space memory
     (instructions, data, and stack) and per-process state
     private to the kernel. Xv6 can time-share processes: it
     transparently switches the available CPUs among the set of
     processes waiting to execute. When a process is not
     executing, xv6 saves its CPU registers, restoring them when
     it next runs the process. The kernel associates a process
-    identifier, or pid, with each process.</p>
-  
-  <p>A process may create a new process using the {{ "fork" | goto_line }}  system
+    identifier, or pid, with each process.
+  </p>
+  <p>
+    A process may create a new process using the {{ "fork" | goto_line }}  system
     call. Fork creates a new process, called the child process,
     with exactly the same memory contents as the calling
     process, called the parent process. Fork returns in both the
     parent and the child.  In the parent, fork returns the
     child’s pid; in the child, it returns zero. For example,
-    consider the following program fragment: </p>
-  
+    consider the following program fragment:
+  </p>
   {{
   '''        
   int pid = fork();
@@ -116,7 +121,8 @@
   '''
   | code }}
 
-  <p> The exit system call causes the calling process to stop
+  <p>
+    The exit system call causes the calling process to stop
     executing and to release resources such as memory and open
     files. The wait system call returns the pid of an exited
     child of the current process; if none of the caller's
@@ -129,10 +135,10 @@
     child: exiting
   </pre>
   
-  <p> might come out in either order, depending on whether
-    the parent or child gets to its printf call
-    first. After the child exits the parent’s wait
-    returns, causing the parent to print
+  <p>
+    might come out in either order, depending on whether the parent or
+    child gets to its printf call first. After the child exits the
+    parent’s wait returns, causing the parent to print
   </p>
 
   <pre>
@@ -143,25 +149,25 @@
   <table class="table table-sm">
     <tr> <td><b>System call</b></td> <td><b>Description</b></td> </tr>
     <tr> <td>{{"fork"|goto_line}}</td><td> Create a process </td></tr>
-    <tr> <td><a href="javascript:gotoLine(2627);">exit</a>()</td><td> Terminate the current process </td></tr>
-    <tr> <td>wait()</td><td> Wait for a child process to exit </td></tr>
-    <tr> <td>kill(pid)</td><td> Terminate process pid </td></tr>
-    <tr> <td>getpid()</td><td> Return the current process’s pid </td></tr>
-    <tr> <td><a href="javascript:gotoLine(2874);">sleep</a>(n)</td><td> Sleep for n clock ticks </td></tr>
-    <tr> <td><a href="javascript:gotoLine(6610);">exec</a>(filename, *argv)</td><td> Load a file and execute it </td></tr>
-    <tr> <td><a href="javascript:gotoLine(3800);">sbrk</a>(n)</td><td> Grow process’s memory by n bytes </td></tr>
-    <tr> <td>open(filename, flags)</td><td> Open a file; the flags indicate read/write </td></tr>
-    <tr> <td>read(fd, buf, n)</td><td> Read n bytes from an open file into buf </td></tr>
-    <tr> <td>write(fd, buf, n)</td><td> Write n bytes to an open file </td></tr>
-    <tr> <td>close(fd)</td><td> Release open file fd </td></tr>
-    <tr> <td>dup(fd)</td><td> Duplicate fd </td></tr>
-    <tr> <td>pipe(p)</td><td> Create a pipe and return fd’s in p </td></tr>
-    <tr> <td>chdir(dirname)</td><td> Change the current directory </td></tr>
-    <tr> <td>mkdir(dirname)</td><td> Create a new directory </td></tr>
-    <tr> <td>mknod(name, major, minor)</td><td> Create a device file </td></tr>
-    <tr> <td>fstat(fd)</td><td> Return info about an open file </td></tr>
-    <tr> <td>link(f1, f2)</td><td> Create another name (f2) for the file f1 </td></tr>
-    <tr> <td>unlink(filename)</td><td> Remove a file </td></tr>
+    <tr> <td>{{"exit"|goto_line}}()</td><td> Terminate the current process </td></tr>
+    <tr> <td>{{"wait"|goto_line}}()</td><td> Wait for a child process to exit </td></tr>
+    <tr> <td>{{"kill"|goto_line}}(pid)</td><td> Terminate process pid </td></tr>
+    <tr> <td>{{"getpid"|goto_line}}()</td><td> Return the current process’s pid </td></tr>
+    <tr> <td>{{"sleep"|goto_line}}(n)</td><td> Sleep for n clock ticks </td></tr>
+    <tr> <td>{{"exec"|goto_line}}(filename, *argv)</td><td> Load a file and execute it </td></tr>
+    <tr> <td>{{"sbrk"|goto_line}}(n)</td><td> Grow process’s memory by n bytes </td></tr>
+    <tr> <td>{{"open"|goto_line}}(filename, flags)</td><td> Open a file; the flags indicate read/write </td></tr>
+    <tr> <td>{{"read"|goto_line}}(fd, buf, n)</td><td> Read n bytes from an open file into buf </td></tr>
+    <tr> <td>{{"write"|goto_line}}(fd, buf, n)</td><td> Write n bytes to an open file </td></tr>
+    <tr> <td>{{"close"|goto_line}}(fd)</td><td> Release open file fd </td></tr>
+    <tr> <td>{{"dup"|goto_line}}(fd)</td><td> Duplicate fd </td></tr>
+    <tr> <td>{{"pipe"|goto_line}}(p)</td><td> Create a pipe and return fd’s in p </td></tr>
+    <tr> <td>{{"chdir"|goto_line}}(dirname)</td><td> Change the current directory </td></tr>
+    <tr> <td>{{"mkdir"|goto_line}}(dirname)</td><td> Create a new directory </td></tr>
+    <tr> <td>{{"mknod"|goto_line}}(name, major, minor)</td><td> Create a device file </td></tr>
+    <tr> <td>{{"fstat"|goto_line}}(fd)</td><td> Return info about an open file </td></tr>
+    <tr> <td>{{"link"|goto_line}}(f1, f2)</td><td> Create another name (f2) for the file f1 </td></tr>
+    <tr> <td>{{"unlink"|goto_line}}(filename)</td><td> Remove a file </td></tr>
   </table>
   
   <hr>
@@ -203,20 +209,22 @@
     conventionally the name of the program.
   </p>
 
-  <p>The xv6 shell uses the above calls to run programs on
-    behalf of users. The main structure of the shell is simple; see main
-    <a href="javascript:gotoLine(8701);">(8701)</a>. The main loop reads a line of input from the user with
-    getcmd. Then it calls {{ "fork" | goto_line }} , which creates a copy of the shell process.
-    The parent calls wait, while the child runs the command. For example,
-    if the user had typed ‘‘echo hello’’ to the shell, runcmd would have
-    been called with ‘‘echo hello’’ as the argument. runcmd <a href="javascript:gotoLine(8606);">(8606)</a> runs
-    the actual command. For ‘‘echo hello’’, it would call exec <a href="javascript:gotoLine(8626);">(8626)</a>. If
-    exec succeeds then the child will execute instructions from echo
-    instead of runcmd. At some point echo will call exit, which will cause
-    the parent to return from wait in main <a href="javascript:gotoLine(8701);">(8701)</a>. You might wonder why
-    fork and exec are not combined in a single call; we will see later
-    that separate calls for creating a process and loading a program is a
-    clever design.</p>
+  <p>The xv6 shell uses the above calls to run programs on behalf of
+    users. The main structure of the shell is simple; see main
+    {{8701|line}}. The main loop reads a line of input from the user
+    with getcmd. Then it calls {{ "fork" | goto_line }} , which
+    creates a copy of the shell process.  The parent calls wait, while
+    the child runs the command. For example, if the user had typed
+    ‘‘echo hello’’ to the shell, runcmd would have been called with
+    ‘‘echo hello’’ as the argument. {{"runcmd"|goto_line}} runs the
+    actual command. For ‘‘echo hello’’, it would call
+    {{"exec"|goto_line}}. If exec succeeds then the child will execute
+    instructions from echo instead of {{"runcmd"|goto_line}}. At some
+    point echo will call {{"exit"|goto_line}}, which will cause the
+    parent to return from wait in {{"main"|goto_line}}. You might
+    wonder why {{"fork"|goto_line}} and {{"exec"|goto_line}} are not combined in a single call; we
+    will see later that separate calls for creating a process and
+    loading a program is a clever design.</p>
 
   <p>
     Xv6 allocates most user-space memory implicitly: {{"fork"|goto_line}} 
@@ -509,13 +517,13 @@
     files: the pipeline
   </p>
 
-  <code><pre> echo hello world | wc </code></pre>
+  {{ "echo hello world | wc" | bash }}
 
 
   <p>could be implemented without pipes as</p>
-
-  <code><pre> echo hello world &gt /tmp/xyz; wc &lt /tmp/xyz </code></pre>
-
+  
+  {{ '''echo hello world > /tmp/xyz; wc < /tmp/xyz''' | bash}}
+  
   <p>
     Pipes have at least four advantages over temporary
     files in this situation. First, pipes
@@ -571,10 +579,10 @@
   </p>
 
   <p>
-    There are multiple system calls to create a new
-    file or directory: <a href="javascript:gotoLine(6451);">mkdir</a> creates
-    a new directory, open with the <b>O_CREATE</b> flag
-    creates a new data file, and <a href="javascript:gotoLine(6467);">mknod</a> creates a new
+    There are multiple system calls to create a new file or directory:
+    {{"mkdir"|goto_line}} creates a new directory, open with
+    the <b>O_CREATE</b> flag creates a new data file,
+    and {{"mknod"|goto_line}} creates a new
     device file. This example illustrates all three:
   </p>
 

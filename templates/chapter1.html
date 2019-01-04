@@ -418,14 +418,15 @@
   <p>
     Returning to
     <a href="javascript:gotoLine(1044);"><code>entry</code></a> it loads the physical address of
-    <code>entrypgdir</code> into control register <code>%cr3</code>. The value in <code>%cr3</code>
-    must be a physical address. It wouldn't make sense for  <code>%cr3</code>  to hold the virtual address of
+    <code>entrypgdir</code> into control register {{"cr3"|reg}}. The value in
+    {{"cr3"|reg}}
+    must be a physical address. It wouldn't make sense for  {{"cr3"|reg}}  to hold the virtual address of
     <code>entrypgdir</code>, because the paging hardware doesn't know how to translate virtual addresses yet; it
     doesn't have a page table yet. The symbol   <code>entrypgdir</code>, refers to an address in high memory,
     and the macro <a href="javascript:gotoLine(213);"><code>V2P_WO</code></a>
     subtracts <code>KERNBASE</code> in order to find the physical address.
     To enable the paging hardware, xv6 sets the flag <a href="javascript:gotoLine(709);"><code>CR0_PG</code></a>
-    in the control register <code>%cr0</code>
+    in the control register {{"cr0"|reg}}
   </p>
 
   <p>
@@ -440,7 +441,7 @@
   <p>
     Now {{ "entry" | goto_line }} needs to transfer to the kernel's C
     code, and run it in high memory.  First it makes the stack
-    pointer, <code>%esp</code>, point to memory to be used as a stack
+    pointer, {{"esp"|reg}}, point to memory to be used as a stack
     .line entry.S:/movl.*stack.*esp/ .  All symbols have high
     addresses, including <code>stack ,</code> so the stack will still
     be valid even when the low mappings are removed.  Finally
@@ -475,10 +476,10 @@
     in the process table and
     to initialize the parts of the process's state
     required for its kernel thread to execute.
-    <code>Allocproc</code> is called for each new process, while
+    {{"allocproc"|goto_line}} is called for each new process, while
     <a href="javascript:gotoLine(2520);"><code>userinit</code></a> 
     is called only for the very first process.
-    <code>Allocproc</code>
+    {{"allocproc"|goto_line}}
     scans the 
     <code>proc</code>
     table for a slot with state
@@ -493,7 +494,7 @@
     
     Next, it tries to allocate a kernel stack for the
     process's kernel thread. If the memory allocation fails, 
-    <code>allocproc</code>
+    {{"allocproc"|goto_line}}
     changes the state back to
     <code>UNUSED</code>
     and returns zero to signal failure.
@@ -507,17 +508,17 @@
     <br/>
     
   <p>
-    Now <code>allocproc</code> must set up the new process's kernel stack.
-    <code>allocproc</code>
+    Now {{"allocproc"|goto_line}} must set up the new process's kernel stack.
+    {{"allocproc"|goto_line}}
     is written so that it can be used by 
-    <code>fork</code>
+    {{"fork"|goto_line}}
     as well
     as when creating the first process.
-    <code>allocproc</code> sets up the new process with a
+    {{"allocproc"|goto_line}} sets up the new process with a
     specially prepared kernel stack and set of kernel
     registers that cause it to "return" to user space when
     it first runs. The layout of the prepared kernel stack
-    will be as shown in <b>figure 1-4</b>. <code>allocproc</code>
+    will be as shown in <b>figure 1-4</b>. {{"allocproc"|goto_line}}
     does part of this work by setting up return program
     counter values that will cause the new process's kernel
     thread to first execute in {{"forkret"|goto_line}} and then
@@ -526,22 +527,21 @@
     The kernel thread will start executing with register contents copied from
     <code>p->context.</code> Thus setting <code>p->context->eip</code> 
     to <code>forkret</code> will cause the kernel thread to execute at
-    the start of <a href="javascript:gotoLine(2853);"><code>forkret</code></a>.
+    the start of {{"forkret"|goto_line}}.
     
     This function will return to whatever address is at the bottom of
-    the stack. The <a href="javascript:gotoLine(3058);">context
-    switch code</a> sets the stack pointer to point just beyond the
-    end of <code>p->context.</code>
-    <code>allocproc</code> places <code>p->context</code> on the stack, and puts a pointer to
-    <code>trapret</code> just above it; that is where <code>forkret</code> 
-    will return. <code>trapret</code> restores user registers
+    the stack. The context switch code {{3058|line}} sets the stack
+    pointer to point just beyond the end of <code>p->context.</code>
+    {{"allocproc"|goto_line}} places <code>p->context</code> on the stack, and puts a pointer to
+    {{"trapret"|goto_line}} just above it; that is where {{"forkret"|goto_line}} 
+    will return. {{"trapret"|goto_line}} restores user registers
     from values stored at the top of the kernel stack and jumps
     into the <a href="javascript:gotoLine(3324);">process</a>
-    This setup is the same for ordinary <code>fork</code> 
+    This setup is the same for ordinary {{"fork"|goto_line}}
     and for creating the first process, though in
     the latter case the process will start executing at
     user-space location zero rather than at a return from
-    <code>fork.</code> 
+    {{"fork"|goto_line}}.
   </p>
 
   <p>
@@ -555,8 +555,7 @@
     if the process had entered the kernel via an {{ "interrupt" |
     goto_lines(2533, 2540) }} so that the ordinary code for returning
     from the kernel back to the process's user code will work. These
-    values are a
-    <code>struct trapframe</code> 
+    values are a <code>struct</code> {{"trapframe"|struct}}
     which stores the user registers. Now the new process's kernel stack is
     completely prepared as shown in {{"newkernelstack"|figref}}
   </p>
@@ -582,67 +581,35 @@
 
   <p>
     The initial contents of the first process's user-space memory are
-    the compiled form of
-    <code>initcode.S ;</code> 
-    as part of the kernel build process, the linker
-    embeds that binary in the kernel and
-    defines two special symbols,
-    <code>_binary_initcode_start</code> 
-    and
-    <code>_binary_initcode_size ,</code> 
-    indicating the location and size of the binary.
-    <code>Userinit</code> 
-    copies that binary into the new process's memory
-    by calling
-    <code>inituvm ,</code> 
-    which allocates one page of physical memory,
-    maps virtual address zero to that memory,
-    and copies the binary to that page
-    .line vm.c:/^inituvm/ .
-
-  </p><p>
-    Then 
-    <code>userinit</code>
-    sets up the trap frame
-    .line x86.h:/^struct.trapframe/
-    with the initial user mode state:
-    the
-    .register cs
-    register contains a segment selector for the
-    <code>SEG_UCODE</code> 
-    segment running at privilege level
-    <code>DPL_USER</code> 
-    (i.e., user mode rather than kernel mode),
+    the compiled form of {{"initcode.S"|sheet}} as part of the kernel build process, the linker
+    embeds that binary in the kernel and defines two special symbols,
+    <code>_binary_initcode_start</code> and <code>_binary_initcode_size</code>,
+    indicating the location and size of the binary. {{"userinit"|goto_line}}
+    copies that binary into the new process's memory by calling
+    {{"inituvm"|goto_line}}, which allocates one page of physical memory,
+    maps virtual address zero to that memory, and copies the binary to that page.
+  </p>
+  <p>
+    Then {{"userinit"|goto_line}} sets up the {{"trapframe"|struct}}
+    with the initial user mode state: the
+    {{"cs"|reg}} register contains a segment selector for the
+    {{"SEG_UCODE"|goto_line}} segment running at privilege level
+    {{"DPL_USER"|goto_line}} (i.e., user mode rather than kernel mode),
     and similarly
-    .register ds ,
-    .register es ,
-    and
-    .register ss
-    use
-    <code>SEG_UDATA</code> 
-    with privilege
-    <code>DPL_USER .</code> 
-    The
-    .register eflags
-    <code>FL_IF</code> 
-    bit is set to allow hardware interrupts;
-    we will reexamine this in Chapter \*[CH:TRAP].
+    {{"ds"|reg}}, {{"es"|reg}}, and {{"ss"|reg}} use {{"SEG_UDATA"|goto_line}} with privilege
+    {{"DPL_USER"|goto_line}}. The {{"eflags"|reg}} <code>FL_IF</code> bit is set to allow hardware interrupts;
+    we will reexamine this in {{"TRAP"|chapref}}.
 
   </p><p>
-    The stack pointer 
-    .register esp
+    The stack pointer {{"esp"|reg}}
     is set to the process's largest valid virtual address,
     <code>p->sz.</code> 
     The instruction pointer is set to the entry point
     for the initcode, address 0.
 
   </p><p>
-    The function
-    <code>userinit</code> 
-    sets
-    <code>p->name</code> 
-    to
-    <code>"initcode"</code> 
+    The function {{"userinit"|goto_line}}
+    sets <code>p->name</code> to <code>"initcode"</code> 
     mainly for debugging.
     Setting
     <code>p->cwd</code> 
@@ -733,12 +700,12 @@
     instruction 
     .line swtch.S:/ret$/
     pops the target process's
-    .register eip
+    {{"eip"|reg}}
     from the stack, finishing the context switch.
     Now the processor is running on the kernel stack of process
     <code>p .</code> 
   </p><p>
-    <code>Allocproc</code> 
+    {{"allocproc"|goto_line}} 
     had previously set
     <code>initproc 's</code> 
     <code>p->context->eip</code> 
@@ -758,7 +725,7 @@
     Then, 
     <code>forkret </code> 
     returns.
-    <code>Allocproc</code> 
+    {{"allocproc"|goto_line}} 
     arranged that the top word on the stack after
     <code>p->context</code> 
     is popped off
@@ -768,7 +735,7 @@
     <code>trapret</code> 
     begins executing,
     with 
-    .register esp
+    {{"esp"|reg}}
     set to
     <code>p->tf .</code> 
     <code>Trapret</code> 
@@ -784,11 +751,11 @@
     then the
     <code>popl </code> 
     instructions restore
-    .register gs ,
-    .register fs ,
-    .register es ,
+    {{"gs"|reg}},
+   {{"fs"|reg}} ,
+   {{"es"|reg}} ,
     and
-    .register ds .
+   {{"ds"|reg}} .
     The 
     <code>addl</code> 
     skips over the two fields
@@ -798,69 +765,57 @@
     Finally, the
     <code>iret</code> 
     instruction pops 
-    .register cs ,
-    .register eip ,
-    .register flags ,
-    .register esp ,
+   {{"cs"|reg}} ,
+    {{"eip"|reg}} ,
+    fl{{"ags"|reg}} ,
+    {{"esp"|reg}} ,
     and
-    .register ss
+   {{"ss"|reg}}
     from the stack.
     The contents of the trap frame
     have been transferred to the CPU state,
     so the processor continues at the
-    .register eip
+    {{"eip"|reg}}
     specified in the trap frame.
-    For
-    <code>initproc ,</code> 
+    <code>initproc</code>,
     that means virtual address zero,
     the first instruction of
-    <code>initcode.S .</code> 
-  </p><p>
-    At this point,
-    .register eip
-    holds zero and
-    .register esp
-    holds 4096.
-    These are virtual addresses in the process's address space.
-    The processor's paging hardware translates them into physical addresses.
-    <code>allocuvm</code> 
-    has set up the process's page table so that virtual address
-    zero refers
-    to the physical memory allocated for this process,
-    and set a flag
-    <code>PTE_U ) (</code> 
-    that tells the paging hardware to allow user code to access that memory.
-    The fact that
-    <code>userinit</code> 
-    .line proc.c:/UCODE/
-    set up the low bits of
-    .register cs
-    to run the process's user code at CPL=3 means that the user code
-    can only use pages with
-    <code>PTE_U</code> 
+    {{"initcode.S"|sheet}}.
+  </p>
+  <p>
+    At this point, {{"eip"|reg}} holds zero and {{"esp"|reg}}
+    holds 4096. These are virtual addresses in the process's address
+    space. The processor's paging hardware translates them into
+    physical addresses. <code>allocuvm</code> has set up the process's
+    page table so that virtual address zero refers to the physical
+    memory allocated for this process, and set a flag
+    {{"PTE_U"|goto_line}} that tells the paging hardware to allow user
+    code to access that memory.  The fact that
+    {{"userinit"|goto_line}} set up the low bits of
+    {{"cs"|reg}} to run the process's user code at CPL=3 means
+    that the user code can only use pages with {{"PTE_U"|goto_line}}
     set, and cannot modify sensitive hardware registers such as
-    .register cr3 .
-    So the process is constrained to using only its own memory.
-    .\"
-    .section "The first system call: exec"
-    .\"
-  </p><p>
-    Now that we have seen how the kernel provides strong isolation for processes, let's
-    look at how a user-level process re-enters the kernel to ask for services
-    that it cannot perform itself.
-  </p><p>
-    The first action of 
-    <code>initcode.S</code> 
-    is to invoke  the
-    <code>exec</code> 
-    system call.
-    As we saw in Chapter \*[CH:UNIX], 
-    <code>exec</code> 
-    replaces the memory and registers of the
+    {{"cr3"|reg}}. So the process is constrained to using only its own
+    memory.
+  </p>
+    
+  {{ "The first system call: exec" | section }}
+  
+  <p>
+    Now that we have seen how the kernel provides strong isolation for
+    processes, let's look at how a user-level process re-enters the
+    kernel to ask for services that it cannot perform itself.
+  </p>
+  <p>
+    The first action of {{"initcode.S"|sheet}} is to invoke  the
+    {{"exec"|goto_line}} system call. As we saw in Chapter {{"UNIX"|chapref}}], 
+    {{"exec"|goto_line}} replaces the memory and registers of the
     current process with a new program, but it leaves the
     file descriptors, process id, and parent process unchanged.
-  </p><p>
-    <code>Initcode.S</code>.
+  </p>
+  <p>
+    
+    {{"initcode.S"|sheet}}.
     line initcode.S:/^start/
     begins by pushing three values
     on the stack-\c
@@ -869,7 +824,7 @@
     and
     <code>$0 -\c</code> 
     and then sets
-    .register eax
+    {{"eax"|reg}}
     to
     <code>SYS_exec</code> 
     and executes
@@ -910,20 +865,21 @@
   </p>
   <p>
 
-    Chapter {{"MEM" | chapter}} will cover the implementation
-    of <code>exec </code> in detail, but at a high level it replaces
-    <code>initcode </code> with the <code>/init</code> binary, loaded
-    out of the file system. Now <code>initcode</code> .line
-    initcode.S:1 is done, and the process will run <code>/init</code>
-    instead. <code>Init</code> .line init.c:/^main/ creates a new
+    Chapter {{"MEM" | chapref}} will cover the implementation
+    of {{"exec"|goto_line}} in detail, but at a high level it replaces
+    <code>initcode</code> with the <code>/init</code> binary, loaded
+    out of the file system. Now <code>initcode</code>
+    .line initcode.S:1
+    is done, and the process will run <code>/init</code>
+    instead. {{"init"|goto_line}} creates a new
     console device file if needed and then opens it as file
     descriptors 0, 1, and 2. Then it loops, starting a console shell,
     handles orphaned zombies until the shell exits, and repeats. The system is up.
 
     {{ "Real world" | section }}
     
-  </p><p>
-    
+  </p>
+  <p>
     In the real world, one can find both monolithic kernels and
     microkernels. Many Unix kernels are monolithic. For example, Linux
     has a monolithic kernel, although some OS functions run as
@@ -938,7 +894,7 @@
     <code>proc</code> 
     structures with an explicit free list
     in constant time instead of the linear-time search in
-    <code>allocproc</code>;
+    {{"allocproc"|goto_line}};
     xv6 uses the linear scan
     (the first of many) for simplicity.
   </p>
@@ -954,7 +910,7 @@
   </p>
 
   <p>
-    2. <code>KERNBASE</code> limits the amount of memory a single
+    2. {{"KERNBASE"|goto_line}} limits the amount of memory a single
     process can use, which might be irritating on a machine with a
     full 4 GB of RAM. Would raising <code>KERNBASE</code> allow a
     process to use more memory?

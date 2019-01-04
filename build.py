@@ -1,6 +1,7 @@
 from jinja2 import Environment, FileSystemLoader #, select_autoescape
 from subprocess import Popen, PIPE
-from line_table import lineTable
+from line_table import lineTable, sheetTable
+import x86reg
 
 env = Environment(
     loader=FileSystemLoader('templates'),
@@ -12,6 +13,7 @@ structTable = {
     "spin lock": (3119, 3123),
     "elfhdr": 905,
     "proghdr": 924,
+    "trapframe": 602,
 }
 
 figrefTable = {
@@ -20,107 +22,6 @@ figrefTable = {
     "xv6_layout": "2-2",
     "processlayout": "2-3",
 }
-
-sheetTable = {
-    "types.h": 100,
-    "param.h": 150,
-    "memlayout.h": 200,
-    "defs.h": 250,
-    "x86.h": 400,
-    "asm.h": 600,
-    "mmu.h": 700,
-    "elf.h": 900,
-    "date.h": 950,
-    "entry.S": 1000,
-    "entryother.S": 1100,
-    "main.c": 1200,
-    "spinlock.h": 1500,
-    "spinlock.c": 1550,
-    "vm.c": 1700,
-    "proc.h": 2300,
-    "proc.c": 2400,
-    "swtch.S": 3000,
-    "kalloc.c": 3100,
-    "traps.h": 3200,
-    "vectors.pl": 3250,
-    "trapasm.S": 3300,
-    "trap.c": 3350,
-    "syscall.h": 3500,
-    "syscall.c": 3550,
-    "sysproc.c": 3700,
-    "buf.h": 3800,
-    "sleeplock.h": 3900,
-    "fcntl.h": 3950,
-    "stat.h": 4000,
-    "fs.h": 4050,
-    "file.h": 4100,
-    "ide.c": 4200,
-    "bio.c": 4400,
-    "sleeplock.c": 4600,
-    "log.c": 4700,
-    "fs.c": 4900,
-    "file.c": 5800,
-    "sysfile.c": 6000,
-    "exec.c": 6600,
-    "pipe.c": 6700,
-    "string.c": 6900,
-    "mp.h": 7000,
-    "mp.c": 7200,
-    "lapic.c": 7300,
-    "ioapic.c": 7600,
-    "kbd.h": 7700,
-    "kbd.c": 7800,
-    "console.c": 7900,
-    "uart.c": 8300,
-    "initcode.S": 8400,
-    "usys.S": 8450,
-    "init.c": 8500,
-    "sh.c": 8550,
-    "bootasm.S": 9100,
-    "bootmain.c": 9200,
-    "kernel.ld": 9300,
-}
-
-
-    
-#     "types.h": 100,
-#     "param.h": 150,
-#     "memlayout.h": 200,
-#     "defs.h": 250,
-#     "x86.h": 450,
-#     "asm.h": 650,
-#     "mmu.h": 700,
-#     "elf.h": 900,
-#     "date.h": 950,
-#     "entry.S": 1000,
-#     "entryother.S": 1100, 
-#     "main.c": 1200,
-#     "spinlock.h": 1500,
-#     "spinlock.c": 1550,
-#     "vm.c": 1700,
-#     "proc.h": 2300,
-#     "proc.c": 2400,
-#     "kalloc.c": 3100, 
-#     "traps.h": 3200,
-#     "vectors.pl": 3250,
-#     "trapasm.S": 3300,
-#     "trap.c": 3350,
-#     "syscall.h": 3500,
-#     "syscall.c": 3550,
-#     "sysproc.c": 3750,
-#     "buf.h": 3850,
-#     "sleeplock.h": 3900,
-#     "fcntl.h": 3950,
-#     "stat.h": 4000,
-#     "fs.h": 4050,
-#     "file.h": 4150,
-#     "ide.c": 4200,
-#     "bio.c": 4400,
-#     "sleeplock.c": 4600,
-#     "log.c": 4700,
-#     "fs.c": 4950,
-#     "exec.c": 6600,
-# }
 
 addrTable = {
     "KERNBASE": 207,
@@ -221,9 +122,20 @@ def appendix(name):
 @register
 def chapref(chapname):
     return {
-        "MEM": "3",
+        "UNIX": "0",
+        "MEM": "2",
+        "TRAP": "3",
         "LOCK": "4",
     }[chapname]
+
+@register
+def bash(txt):
+    from pygments import highlight
+    from pygments.lexers import BashLexer
+    from pygments.formatters import HtmlFormatter
+
+    fmtd = highlight("$ " + txt, BashLexer(), HtmlFormatter())
+    return "%s\n" % fmtd
 
 @register
 def figure(caption, num):
