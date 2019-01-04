@@ -127,11 +127,11 @@ var mod = function(){
             this.buildSentences();
             this.sentences[0].highlight();
         }
-
+        
         buildSentences() {
             const sep = ". ";
             var txt = this.el.textContent;
-            txt = txt.replace('.\n', '. ');
+            txt = txt.split(/[,;:\\.][\s]/).join(". ");
             //var parts = this.el.textContent.split(sep);
             var parts = txt.split(sep); 
             
